@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {useEffect,useMemo,useState} from "react";
+import type {FormEvent} from "react";
 import {ShoppingBag,Search,ArrowRight,Truck,ShieldCheck,Headphones,Plus,CheckCircle2,Menu,UserRound,Heart,Star,BookOpen,Pencil,Ruler,Briefcase,Home,Gift,PackageCheck,ChevronLeft,ChevronRight,Mail,Phone,Instagram,Facebook} from "lucide-react";
 import {products as demoProducts,categories,Product} from "@/lib/products";
 
@@ -40,7 +41,7 @@ export default function Storefront(){
  const filtered=useMemo(()=>catalogue.filter(p=>(category==="All"||p.category===category)&&(p.name.toLowerCase().includes(query.toLowerCase())||p.category.toLowerCase().includes(query.toLowerCase()))),[query,category,catalogue]);
  function add(p:Product){setCart(old=>{const found=old.find(x=>x.id===p.id);return found?old.map(x=>x.id===p.id?{...x,qty:x.qty+1}:x):[...old,{id:p.id,qty:1}]});setNotice(p.name+" added to cart");setTimeout(()=>setNotice(""),2200)}
  function chooseCategory(value:string){setCategory(value);document.getElementById("products")?.scrollIntoView({behavior:"smooth"})}
- function newsletterSubmit(e:React.FormEvent<HTMLFormElement>){e.preventDefault();setNewsletterMessage("Newsletter signup will be available soon. Thanks for your interest!");setNewsletter("")}
+ function newsletterSubmit(e:FormEvent<HTMLFormElement>){e.preventDefault();setNewsletterMessage("Newsletter signup will be available soon. Thanks for your interest!");setNewsletter("")}
  const active=slides[slide];
  return <main className="pinakk-redesign">
   <div className="pr-topbar"><span><Phone size={13}/> Support: <a href="tel:9685535343">96855 35343</a></span><span className="pr-top-message">ASHISH STATIONERY & PHOTOCOPY · REHTI</span><div><button onClick={()=>setNotice("Customer accounts are coming soon.")}><UserRound size={14}/> My Account</button><Link href="/cart"><ShoppingBag size={14}/> Cart <b>{count}</b></Link></div></div>
@@ -69,7 +70,7 @@ export default function Storefront(){
   </section>
   <section className="pr-brand-promo"><div><span className="pr-kicker">THE PINAKK PROMISE</span><h2>Little things.<br/><i>Better everyday.</i></h2><p>From the first page of a notebook to the finishing touch of your everyday style, find the essentials that make life smoother.</p><a href="#categories">DISCOVER PINAKK <ArrowRight size={16}/></a></div><div className="pr-promo-photo"><Image src="https://images.unsplash.com/photo-1710031407576-135a680d6e10?auto=format&fit=crop&w=1100&q=85" alt="Backpack, notebooks and daily essentials arranged together" fill sizes="(max-width:700px) 90vw, 45vw"/></div><div className="pr-promo-seal">SHOP SMART<br/><b>LIVE BETTER</b></div></section>
   <footer className="pr-footer" id="contact"><div className="pr-footer-main"><div className="pr-footer-about"><Link href="/" className="pr-logo"><span className="pr-logo-mark">P</span><span><b>PINAKK</b><small>SHOP SMART, LIVE BETTER</small></span></Link><p>Your everyday destination for stationery, books, lifestyle essentials and more. Proudly serving Rehti and nearby communities.</p><div className="pr-social"><a href="https://www.instagram.com/" aria-label="Instagram"><Instagram/></a><a href="https://www.facebook.com/" aria-label="Facebook"><Facebook/></a><a href="https://wa.me/919685535343" aria-label="WhatsApp">WA</a></div></div>
-   <div><b className="pr-footer-title">QUICK LINKS</b><a href="#about">About Us</a><a href="#contact">Contact</a><a href="#shipping">Shipping Policy</a><a href="#privacy">Privacy Policy</a><a href="#terms">Terms & Conditions</a></div>
+   <div><b className="pr-footer-title">QUICK LINKS</b><a href="#contact">About Us</a><a href="#contact">Contact</a><a href="#contact">Shipping Policy</a><a href="#contact">Privacy Policy</a><a href="#contact">Terms & Conditions</a></div>
    <div><b className="pr-footer-title">SHOP BY CATEGORY</b><a href="#categories">Stationery</a><a href="#categories">Books & Guides</a><a href="#categories">Lifestyle</a><a href="#categories">General Items</a><a href="#products">Featured Products</a></div>
    <div className="pr-newsletter"><b className="pr-footer-title">THE PINAKK LETTER</b><p>Get store updates, new arrivals and special offers.</p><form onSubmit={newsletterSubmit}><label className="sr-only" htmlFor="pr-newsletter-email">Email address</label><input id="pr-newsletter-email" type="email" required placeholder="Your email address" value={newsletter} onChange={e=>setNewsletter(e.target.value)}/><button aria-label="Join newsletter"><ArrowRight/></button></form>{newsletterMessage&&<small className="pr-newsletter-note">{newsletterMessage}</small>}<a className="pr-footer-contact" href="tel:9685535343"><Phone size={14}/> 96855 35343</a></div>
   </div><div className="pr-footer-bottom"><span>© {new Date().getFullYear()} PINAKK. All rights reserved.</span><span>Design & Developed By <b>DevaCore</b></span><span>Ashish Stationery & Photocopy · Main Road, Rehti</span></div></footer>
