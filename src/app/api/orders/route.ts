@@ -2,17 +2,19 @@ import { randomBytes } from "node:crypto";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
+import { readUserSession } from "@/lib/user-auth";
 import Product from "@/models/Product";
 import Order from "@/models/Order";
+import User from "@/models/User";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
 type RequestedItem = { productId: string; quantity: number };
 
 export async function POST(request: NextRequest) {
   let body: any;
-  try { body = await request.json(); } catch { return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 }); }
+  try { body = await request.json(); }
+  catch { return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 }); }
 
   const customer = body?.customer;
   const method = body?.fulfillmentMethod;
@@ -30,6 +32,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, error: "Complete delivery address and 6-digit PIN code are required" }, { status: 400 });
     }
   }
+
   const quantities = new Map<string, number>();
   for (const item of items) {
     if (!item || typeof item.productId !== "string" || !mongoose.isValidObjectId(item.productId) ||
@@ -42,6 +45,19 @@ export async function POST(request: NextRequest) {
 
   try {
     await connectToDatabase();
+    const session = await readUserSession(request);
+    if (session && session.role !== "customer") {
+      return NextResponse.json({ ok: false, error: "Customer account required to place an order" }, { status: 403 });
+    }
+    const account = session ? await User.findById(session.id).select("name phone email active").lean() as
+      { name: string; phone: string; email?: string; active: boolean } | null : null;
+    if (session && (!account || !account.active)) {
+      return NextResponse.json({ ok: false, error: "Your customer account is unavailable" }, { status: 401 });
+    }
+    const savedCustomer = account
+      ? { name: account.name, phone: account.phone, ...(account.email ? { email: account.email } : {}) }
+      : { name: customer.name.trim(), phone: customer.phone.replace(/[\s-]/g, ""), ...(customer.email ? { email: customer.email.trim() } : {}) };
+
     const ids = [...quantities.keys()];
     const products = await Product.find({ _id: { $in: ids }, active: true }).lean();
     if (products.length !== ids.length) return NextResponse.json({ ok: false, error: "A product is no longer available. Refresh your cart." }, { status: 409 });
@@ -54,7 +70,8 @@ export async function POST(request: NextRequest) {
     const subtotal = orderItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
     const order = await Order.create({
       orderNumber: "PK" + Date.now().toString(36).toUpperCase() + randomBytes(3).toString("hex").toUpperCase(),
-      customer: { name: customer.name.trim(), phone: customer.phone.trim(), ...(customer.email ? { email: customer.email.trim() } : {}) },
+      ...(session ? { customerUserId: session.id } : {}),
+      customer: savedCustomer,
       fulfillmentMethod: method,
       ...(method === "delivery" ? { address: {
         line1: body.address.line1.trim(), line2: typeof body.address.line2 === "string" ? body.address.line2.trim() : "",
