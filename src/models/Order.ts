@@ -27,6 +27,7 @@ const OrderSchema = new Schema({
   subtotal: { type: Number, required: true, min: 0 },
   deliveryFee: { type: Number, required: true, default: 0, min: 0 },
   total: { type: Number, required: true, min: 0 },
+  deliveryBoyId: { type: Schema.Types.ObjectId, ref: "User", default: null, index: true },
   status: { type: String, enum: ["pending", "confirmed", "processing", "ready", "shipped", "delivered", "cancelled"], default: "pending", index: true },
   paymentStatus: { type: String, enum: ["unpaid", "paid", "refunded"], default: "unpaid" },
   paymentMethod: { type: String, enum: ["pay-at-store", "cash-on-delivery"], default: "pay-at-store" },
