@@ -4,7 +4,8 @@ Next.js 14 App Router + TypeScript storefront for **Ashish Stationery & Photocop
 
 ## Included
 - Responsive storefront with search and category filters
-- Demo catalogue and browser-local cart
+- MongoDB-backed active product catalogue with demo fallback
+- Browser-local cart
 - WhatsApp order enquiry handoff (no online payment)
 - MongoDB connection helper and Product model
 - Product API: public active-product listing; API-key-protected create/update
@@ -43,7 +44,7 @@ curl -X POST http://localhost:3000/api/products \
 Deploy as a Next.js application on Render or Vercel. Build command: `npm run build`; start command: `npm start`. Configure the two environment variables above in the hosting dashboard before using the product API.
 
 ## Important limitations — not production-ready yet
-The current storefront still reads its sample catalogue from a TypeScript file and its cart from browser localStorage. It does not yet consume the MongoDB product API. The admin page is only a preview; the API key is a basic server-to-server guard, **not** customer/admin login or a full role-based access system.
+The storefront and cart now request the active catalogue from the MongoDB product API and fall back to sample products when the database is unavailable or empty. The cart remains in browser localStorage. The admin page is still only a preview; the API key is a basic server-to-server guard, **not** customer/admin login or a full role-based access system.
 
 Before live sales, still implement and test:
 1. Connect the storefront and admin UI to the database API.
