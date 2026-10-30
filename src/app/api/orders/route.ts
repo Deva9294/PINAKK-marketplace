@@ -41,7 +41,17 @@ export async function POST(request: NextRequest) {
     }
     quantities.set(item.productId, (quantities.get(item.productId) || 0) + item.quantity);
   }
-  if ([...quantities.values()].some(q => q > 20)) return NextResponse.json({ ok: false, error: "Maximum 20 units per product per order" }, { status: 400 });
+  if ([...quantities.values()].some(q => q > 20)) {
+    return NextResponse.json({ ok: false, error: "Maximum 20 units per product per order" }, { status: 400 });
+  }
+
+  const reserved: Array<{ id: string; quantity: number }> = [];
+  async function releaseStock() {
+    for (const item of reserved) {
+      await Product.updateOne({ _id: item.id }, { $inc: { stock: item.quantity } });
+    }
+    reserved.length = 0;
+  }
 
   try {
     await connectToDatabase();
@@ -60,13 +70,28 @@ export async function POST(request: NextRequest) {
 
     const ids = [...quantities.keys()];
     const products = await Product.find({ _id: { $in: ids }, active: true }).lean();
-    if (products.length !== ids.length) return NextResponse.json({ ok: false, error: "A product is no longer available. Refresh your cart." }, { status: 409 });
+    if (products.length !== ids.length) {
+      return NextResponse.json({ ok: false, error: "A product is no longer available. Refresh your cart." }, { status: 409 });
+    }
+
+    // Atomically reserve stock to prevent simultaneous orders overselling the same item.
+    for (const id of ids) {
+      const quantity = quantities.get(id)!;
+      const result = await Product.updateOne(
+        { _id: id, active: true, stock: { $gte: quantity } },
+        { $inc: { stock: -quantity } }
+      );
+      if (result.modifiedCount !== 1) {
+        await releaseStock();
+        return NextResponse.json({ ok: false, error: "Insufficient stock for " + (products.find(p => String(p._id) === id)?.name || "one item") + ". Refresh your cart." }, { status: 409 });
+      }
+      reserved.push({ id, quantity });
+    }
+
     const orderItems = products.map(p => {
       const quantity = quantities.get(String(p._id))!;
       return { productId: p._id, name: p.name, image: p.image || "", unitPrice: p.price, quantity };
     });
-    const unavailable = products.find(p => p.stock < (quantities.get(String(p._id)) || 0));
-    if (unavailable) return NextResponse.json({ ok: false, error: unavailable.name + " does not have enough stock" }, { status: 409 });
     const subtotal = orderItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
     const order = await Order.create({
       orderNumber: "PK" + Date.now().toString(36).toUpperCase() + randomBytes(3).toString("hex").toUpperCase(),
@@ -81,8 +106,10 @@ export async function POST(request: NextRequest) {
       paymentMethod: method === "delivery" ? "cash-on-delivery" : "pay-at-store",
       customerNote: typeof body.customerNote === "string" ? body.customerNote.slice(0, 500) : "",
     });
+    reserved.length = 0; // Stock is now committed to the saved order.
     return NextResponse.json({ ok: true, order: { orderNumber: order.orderNumber, status: order.status, paymentStatus: order.paymentStatus, subtotal: order.subtotal, total: order.total, createdAt: order.createdAt } }, { status: 201 });
   } catch (error) {
+    try { await releaseStock(); } catch (rollbackError) { console.error("Order stock rollback failed:", rollbackError); }
     console.error("POST /api/orders failed:", error);
     return NextResponse.json({ ok: false, error: "Order service is temporarily unavailable" }, { status: 503 });
   }
