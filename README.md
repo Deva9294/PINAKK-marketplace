@@ -24,14 +24,14 @@ Open http://localhost:3000. Configure MongoDB and admin environment variables be
 - `MONGODB_URI`: MongoDB connection string for the PINAKK database.
 - `PINAKK_ADMIN_EMAIL`: administrator email address.
 - `PINAKK_ADMIN_PASSWORD`: unique, strong administrator password. Never commit it.
-- `AUTH_SECRET`: random secret with at least 32 bytes, used to sign admin sessions.
+- `AUTH_SECRET`: random secret with at least 32 bytes, used to sign admin sessions. The Render Blueprint generates this automatically; set it manually only when deploying outside the Blueprint.
 
 Generate an auth secret with `openssl rand -base64 48`. Use a long unique admin password and keep all values in Render's private environment settings. Never use a `NEXT_PUBLIC_` prefix for secrets. If any secret is exposed, rotate it immediately.
 
 ## Render deployment
 1. Push this repository to GitHub.
 2. In Render, choose **New → Blueprint** and select this repository. Render reads `render.yaml`.
-3. Enter the four required environment values when Render prompts you. Use a MongoDB database and allow only the necessary network access from your hosting service.
+3. Enter `MONGODB_URI`, `PINAKK_ADMIN_EMAIL` and `PINAKK_ADMIN_PASSWORD` when Render prompts you. The Blueprint generates `AUTH_SECRET` automatically. It deploys the `feat/complete-pinakk-marketplace` branch in the Singapore region on the Free plan. Use a MongoDB database and allow only the necessary network access from your hosting service.
 4. Deploy. Render runs `npm install && npm run build` and starts the app with `npm start`.
 5. When deployment succeeds, open `/admin` and sign in with the configured admin email/password.
 6. Check `/api/health` and verify the storefront, admin login and product CRUD before sharing the site.
