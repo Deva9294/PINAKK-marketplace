@@ -44,7 +44,7 @@ export default function Storefront(){
  function newsletterSubmit(e:FormEvent<HTMLFormElement>){e.preventDefault();setNewsletterMessage("Newsletter signup will be available soon. Thanks for your interest!");setNewsletter("")}
  const active=slides[slide];
  return <main className="pinakk-redesign">
-  <div className="pr-topbar"><span><Phone size={13}/> Support: <a href="tel:9685535343">96855 35343</a></span><span className="pr-top-message">ASHISH STATIONERY & PHOTOCOPY · REHTI</span><div><button onClick={()=>setNotice("Customer accounts are coming soon.")}><UserRound size={14}/> My Account</button><Link href="/cart"><ShoppingBag size={14}/> Cart <b>{count}</b></Link></div></div>
+  <div className="pr-topbar"><span><Phone size={13}/> Support: <a href="tel:9685535343">96855 35343</a></span><span className="pr-top-message">ASHISH STATIONERY & PHOTOCOPY · REHTI</span><div><Link href="/customer"><UserRound size={14}/> My Account</Link><Link href="/cart"><ShoppingBag size={14}/> Cart <b>{count}</b></Link></div></div>
   <header className="pr-header">
    <button className="pr-mobile-menu" onClick={()=>setMobileMenu(!mobileMenu)} aria-label="Toggle navigation"><Menu/></button>
    <Link href="/" className="pr-logo"><span className="pr-logo-mark">P</span><span><b>PINAKK</b><small>SHOP SMART, LIVE BETTER</small></span></Link>
