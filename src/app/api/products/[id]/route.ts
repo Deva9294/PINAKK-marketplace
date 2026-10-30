@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
 import Product from "@/models/Product";
@@ -9,8 +10,10 @@ export const dynamic = "force-dynamic";
 function isAdmin(request: NextRequest) {
   const expected = process.env.PINAKK_ADMIN_API_KEY;
   const supplied = request.headers.get("x-admin-api-key");
-  return Boolean(expected && supplied && supplied.length === expected.length &&
-    Buffer.from(supplied).equals(Buffer.from(expected)));
+  if (!expected || !supplied) return false;
+  const suppliedBuffer = Buffer.from(supplied);
+  const expectedBuffer = Buffer.from(expected);
+  return suppliedBuffer.length === expectedBuffer.length && timingSafeEqual(suppliedBuffer, expectedBuffer);
 }
 
 export async function PATCH(request: NextRequest, context: { params: { id: string } }) {
