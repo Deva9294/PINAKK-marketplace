@@ -1,1 +1,13 @@
-import {NextResponse} from "next/server";export async function GET(){return NextResponse.json({ok:true,app:"PINAKK Marketplace",status:"starter-scaffold",timestamp:new Date().toISOString()})}
+import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    app: "PINAKK Marketplace",
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+  });
+}
