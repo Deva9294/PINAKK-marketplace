@@ -6,25 +6,25 @@ import Product from "@/models/Product";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-
 function validProduct(value: unknown): value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const p = value as Record<string, unknown>;
   return typeof p.name === "string" && p.name.trim().length > 0 && p.name.length <= 160 &&
-    typeof p.slug === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.slug) &&
+    typeof p.slug === "string" && p.slug.length <= 180 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.slug) &&
     typeof p.category === "string" && p.category.trim().length > 0 && p.category.length <= 80 &&
     typeof p.description === "string" && p.description.length <= 2000 &&
     typeof p.price === "number" && Number.isFinite(p.price) && p.price >= 0 &&
+    (p.compareAtPrice === undefined || (typeof p.compareAtPrice === "number" && Number.isFinite(p.compareAtPrice) && p.compareAtPrice >= 0)) &&
     typeof p.stock === "number" && Number.isInteger(p.stock) && p.stock >= 0 &&
     (p.image === undefined || (typeof p.image === "string" && p.image.length <= 2000)) &&
-    (p.compareAtPrice === undefined || (typeof p.compareAtPrice === "number" && Number.isFinite(p.compareAtPrice) && p.compareAtPrice >= 0)) &&
     (p.active === undefined || typeof p.active === "boolean");
 }
 
 export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
-    const includeInactive = request.nextUrl.searchParams.get("all") === "1" && await isAdminRequest(request);\n    const products = await Product.find(includeInactive ? {} : { active: true }).sort({ createdAt: -1 }).lean();
+    const includeInactive = request.nextUrl.searchParams.get("all") === "1" && await isAdminRequest(request);
+    const products = await Product.find(includeInactive ? {} : { active: true }).sort({ createdAt: -1 }).lean();
     return NextResponse.json({ ok: true, products });
   } catch (error) {
     console.error("GET /api/products failed:", error);
