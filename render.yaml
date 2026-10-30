@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: pinakk-marketplace
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22.14.0
+      - key: MONGODB_URI
+        sync: false
+      - key: PINAKK_ADMIN_EMAIL
+        sync: false
+      - key: PINAKK_ADMIN_PASSWORD
+        sync: false
+      - key: AUTH_SECRET
+        sync: false
