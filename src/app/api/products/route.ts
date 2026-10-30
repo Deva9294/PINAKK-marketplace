@@ -1,19 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
+import { isAdminRequest } from "@/lib/admin-auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import Product from "@/models/Product";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function isAdmin(request: NextRequest) {
-  const expected = process.env.PINAKK_ADMIN_API_KEY;
-  const supplied = request.headers.get("x-admin-api-key");
-  if (!expected || !supplied) return false;
-  const suppliedBuffer = Buffer.from(supplied);
-  const expectedBuffer = Buffer.from(expected);
-  return suppliedBuffer.length === expectedBuffer.length && timingSafeEqual(suppliedBuffer, expectedBuffer);
-}
 
 function validProduct(value: unknown): value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -40,7 +32,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAdmin(request)) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdminRequest(request))) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   let body: unknown;
   try { body = await request.json(); } catch { return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 }); }
   if (!validProduct(body)) return NextResponse.json({ ok: false, error: "Product fields are invalid" }, { status: 400 });
