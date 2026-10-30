@@ -13,9 +13,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - run: npm install
       - run: npm run build
         env:
           MONGODB_URI: mongodb://127.0.0.1:27017/pinakk_build_check
-          PINAKK_ADMIN_API_KEY: build-check-only-not-a-real-secret
+          PINAKK_ADMIN_EMAIL: admin@example.com\n          PINAKK_ADMIN_PASSWORD: build-check-only-not-a-real-password\n          AUTH_SECRET: build-check-only-secret-with-more-than-32-bytes
