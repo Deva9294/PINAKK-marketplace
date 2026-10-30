@@ -7,7 +7,6 @@ import Product from "@/models/Product";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-
 export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   if (!(await isAdminRequest(request))) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
@@ -21,7 +20,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     return NextResponse.json({ ok: false, error: "Empty or unsupported product fields" }, { status: 400 });
   }
   if (("name" in input && (typeof input.name !== "string" || !input.name.trim() || input.name.length > 160)) ||
-      ("slug" in input && (typeof input.slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(input.slug))) ||
+      ("slug" in input && (typeof input.slug !== "string" || input.slug.length > 180 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(input.slug))) ||
       ("category" in input && (typeof input.category !== "string" || !input.category.trim() || input.category.length > 80)) ||
       ("description" in input && (typeof input.description !== "string" || input.description.length > 2000)) ||
       (["price", "compareAtPrice"].some(k => k in input && (typeof input[k] !== "number" || !Number.isFinite(input[k]) || (input[k] as number) < 0))) ||
@@ -32,7 +31,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   }
   try {
     await connectToDatabase();
-    const product = await Product.findByIdAndUpdate(context.params.id, { $set: input }, { new: true, runValidators: true });
+    const product = await Product.findByIdAndUpdate(id, { $set: input }, { new: true, runValidators: true });
     if (!product) return NextResponse.json({ ok: false, error: "Product not found" }, { status: 404 });
     return NextResponse.json({ ok: true, product });
   } catch (error) {
