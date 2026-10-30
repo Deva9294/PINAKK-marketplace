@@ -9,6 +9,10 @@ export async function POST(request: NextRequest) {
   const identity = typeof body?.identity === "string" ? body.identity.trim().toLowerCase() : "";
   const password = typeof body?.password === "string" ? body.password : "";
   if (!identity || !password || identity.length > 254 || password.length > 128) return NextResponse.json({ ok:false, error:"Enter your mobile/email and password" }, { status:400 });
+  if (!process.env.AUTH_SECRET || Buffer.byteLength(process.env.AUTH_SECRET) < 32) {
+    console.error("Account login unavailable: AUTH_SECRET is missing or shorter than 32 bytes.");
+    return NextResponse.json({ ok:false, error:"Account setup is incomplete on the server. Please contact the store administrator." }, { status:503 });
+  }
   try {
     await connectToDatabase();
     const user = await User.findOne({ $or:[{ phone:identity },{ email:identity }] });
