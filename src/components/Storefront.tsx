@@ -6,7 +6,7 @@ import {ShoppingBag,Search,ArrowRight,Truck,ShieldCheck,Store,Headphones,Plus,Mi
 import {products as demoProducts,categories,Product} from "@/lib/products";
 type CartItem={id:string;qty:number};
 export default function Storefront(){
- const [cart,setCart]=useState<CartItem[]>([]); const [query,setQuery]=useState(""); const [category,setCategory]=useState("All"); const [notice,setNotice]=useState("");
+ const [cart,setCart]=useState<CartItem[]>([]); const [query,setQuery]=useState(""); const [category,setCategory]=useState("All"); const [notice,setNotice]=useState(""); const [catalogue,setCatalogue]=useState<Product[]>(demoProducts); const [catalogueSource,setCatalogueSource]=useState<"demo"|"database">("demo");
  useEffect(()=>{try{setCart(JSON.parse(localStorage.getItem("pinakk-cart")||"[]"))}catch{}; fetch("/api/products").then(r=>r.ok?r.json():Promise.reject()).then(data=>{if(Array.isArray(data.products)&&data.products.length){setCatalogue(data.products.map((p:any)=>({id:String(p._id),name:p.name,category:p.category,price:p.price,oldPrice:p.compareAtPrice,description:p.description,image:p.image||"/placeholder-product.png",stock:p.stock,badge:undefined})));setCatalogueSource("database")}}).catch(()=>setCatalogueSource("demo"))},[]);
  useEffect(()=>{localStorage.setItem("pinakk-cart",JSON.stringify(cart))},[cart]);
  const count=cart.reduce((s,x)=>s+x.qty,0);
