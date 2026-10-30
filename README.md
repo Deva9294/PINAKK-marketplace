@@ -1,15 +1,16 @@
 # PINAKK Marketplace
 
-Next.js 14 App Router + TypeScript storefront for **Ashish Stationery & Photocopy**, Main Road, Rehti, Madhya Pradesh.
+Next.js 15 + React 19 + TypeScript storefront for **Ashish Stationery & Photocopy**, Main Road, Rehti, Madhya Pradesh.
 
-## Included
-- Responsive storefront with search and category filters
-- MongoDB-backed active product catalogue with demo fallback
-- Browser-local cart
-- WhatsApp order enquiry handoff (no online payment)
-- MongoDB connection helper and Product model
-- Product API: public active-product listing; API-key-protected create/update
-- Health endpoint: `/api/health`
+## Implemented
+- Responsive storefront with search, category filters and cart
+- MongoDB-backed product catalogue with demo-catalogue fallback
+- Secure admin login at `/admin` using signed JWT in an HTTP-only, Secure (production), SameSite=Strict cookie
+- Admin product management: add, edit, publish and hide products
+- Server-side authorization on product write endpoints
+- Product API validation and duplicate-slug handling
+- Render Blueprint at `render.yaml`
+- Health endpoint at `/api/health`
 
 ## Run locally
 ```bash
@@ -17,44 +18,37 @@ npm install
 cp .env.example .env.local
 npm run dev
 ```
-Open http://localhost:3000.
+Open http://localhost:3000. Configure MongoDB and admin environment variables before using admin functions.
 
-## Environment variables
-Set these in your local `.env.local` and in the hosting provider's private environment settings:
+## Required environment variables
 - `MONGODB_URI`: MongoDB connection string for the PINAKK database.
-- `PINAKK_ADMIN_API_KEY`: long, random server-only secret used by the current product write API. Never prefix it with `NEXT_PUBLIC_`, commit it, or expose it in browser code.
+- `PINAKK_ADMIN_EMAIL`: administrator email address.
+- `PINAKK_ADMIN_PASSWORD`: unique, strong administrator password. Never commit it.
+- `AUTH_SECRET`: random secret with at least 32 bytes, used to sign admin sessions.
 
-Generate a strong key, for example with `openssl rand -hex 32`. Rotate it immediately if it is ever exposed. Use a database user restricted to the required database and enable network access only for trusted sources where practical.
+Generate an auth secret with `openssl rand -base64 48`. Use a long unique admin password and keep all values in Render's private environment settings. Never use a `NEXT_PUBLIC_` prefix for secrets. If any secret is exposed, rotate it immediately.
+
+## Render deployment
+1. Push this repository to GitHub.
+2. In Render, choose **New → Blueprint** and select this repository. Render reads `render.yaml`.
+3. Enter the four required environment values when Render prompts you. Use a MongoDB database and allow only the necessary network access from your hosting service.
+4. Deploy. Render runs `npm install && npm run build` and starts the app with `npm start`.
+5. When deployment succeeds, open `/admin` and sign in with the configured admin email/password.
+6. Check `/api/health` and verify the storefront, admin login and product CRUD before sharing the site.
+
+You can also create a Render Web Service manually with runtime **Node**, build command `npm install && npm run build`, start command `npm start`, and health check path `/api/health`.
 
 ## Product API
-- `GET /api/products`: lists active products from MongoDB.
-- `POST /api/products`: creates a product; requires `x-admin-api-key`.
-- `PATCH /api/products/:id`: updates product fields; requires `x-admin-api-key`.
-- Write requests validate fields and return generic errors. Do not call the write endpoints directly from public browser code or embed the admin key in a client bundle.
+- `GET /api/products`: public active products; an authenticated admin may add `?all=1` to see hidden products too.
+- `POST /api/products`: create product; requires a valid admin session cookie.
+- `PATCH /api/products/:id`: update product; requires a valid admin session cookie.
+- `POST /api/admin/login`, `POST /api/admin/logout`, `GET /api/admin/session`: admin session endpoints.
 
-Example create request (run from a trusted server/terminal, not a public webpage):
-```bash
-curl -X POST http://localhost:3000/api/products \
-  -H "content-type: application/json" \
-  -H "x-admin-api-key: $PINAKK_ADMIN_API_KEY" \
-  -d '{"name":"A4 Copier Paper","slug":"a4-copier-paper","category":"Paper & Printing","description":"500-sheet pack","price":285,"stock":20}'
-```
+The admin password and signing secret are checked only on the server. Product write APIs do not accept a browser-supplied API key.
 
-## Deployment
-Deploy as a Next.js application on Render or Vercel. Build command: `npm run build`; start command: `npm start`. Configure the two environment variables above in the hosting dashboard before using the product API.
+## Not enabled yet — do not accept live paid orders
+The cart currently remains in browser localStorage and the checkout hands the enquiry to WhatsApp. This repository does **not** yet include persistent customer accounts, order records, Razorpay payment creation/verification/webhooks/refunds, shipping/tax calculation, delivery workflow, invoice generation or transactional notifications. Razorpay cannot be enabled until merchant keys and webhook configuration are supplied and the complete payment flow is implemented and tested. Sample products, prices, images and stock are demonstration data; replace them with verified store inventory before launch.
 
-## Important limitations — not production-ready yet
-The storefront and cart now request the active catalogue from the MongoDB product API and fall back to sample products when the database is unavailable or empty. The cart remains in browser localStorage. The admin page is still only a preview; the API key is a basic server-to-server guard, **not** customer/admin login or a full role-based access system.
+For production launch, also configure privacy policy, terms/returns, shipping rules, customer support details, database backups, rate limiting and monitoring. The admin login currently uses environment-based credentials; use a unique password and rotate it if staff access changes.
 
-Before live sales, still implement and test:
-1. Connect the storefront and admin UI to the database API.
-2. Secure customer, admin and delivery authentication with sessions and role-based permissions.
-3. Persistent carts, orders, stock reservation and order fulfilment workflows.
-4. Razorpay server-side order creation, signature verification, webhook reconciliation and refunds.
-5. Delivery zones, shipping fees, taxes, invoices and order notifications.
-6. Image upload/storage, rate limiting, audit logs, privacy policy and terms.
-7. Automated tests, dependency/security review and deployment verification.
-
-No online payment is collected by this starter. Sample products, prices, images and stock are demonstration data only; verify them before publication.
-
-Store phone: 9685535343. Contact email must be configured and verified before publication.
+Store phone: 9685535343. Confirm the public contact email before launch.
