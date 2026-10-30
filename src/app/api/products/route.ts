@@ -16,7 +16,8 @@ function validProduct(value: unknown): value is Record<string, unknown> {
     typeof p.description === "string" && p.description.length <= 2000 &&
     typeof p.price === "number" && Number.isFinite(p.price) && p.price >= 0 &&
     typeof p.stock === "number" && Number.isInteger(p.stock) && p.stock >= 0 &&
-    (p.image === undefined || typeof p.image === "string") &&
+    (p.image === undefined || (typeof p.image === "string" && p.image.length <= 2000)) &&
+    (p.compareAtPrice === undefined || (typeof p.compareAtPrice === "number" && Number.isFinite(p.compareAtPrice) && p.compareAtPrice >= 0)) &&
     (p.active === undefined || typeof p.active === "boolean");
 }
 
