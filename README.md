@@ -1,6 +1,6 @@
 # PINAKK Marketplace
 
-Next.js 15 + React 19 + TypeScript storefront for **Ashish Stationery & Photocopy**, Main Road, Rehti, Madhya Pradesh.
+Next.js 16 + React 19 + TypeScript storefront for **Ashish Stationery & Photocopy**, Main Road, Rehti, Madhya Pradesh.
 
 ## Implemented
 - Responsive storefront with search, category filters and cart
