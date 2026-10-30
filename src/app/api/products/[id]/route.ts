@@ -8,9 +8,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 
-export async function PATCH(request: NextRequest, context: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   if (!(await isAdminRequest(request))) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-  if (!mongoose.isValidObjectId(context.params.id)) return NextResponse.json({ ok: false, error: "Invalid product ID" }, { status: 400 });
+  if (!mongoose.isValidObjectId(id)) return NextResponse.json({ ok: false, error: "Invalid product ID" }, { status: 400 });
   let body: unknown;
   try { body = await request.json(); } catch { return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 }); }
   if (!body || typeof body !== "object" || Array.isArray(body)) return NextResponse.json({ ok: false, error: "Invalid product fields" }, { status: 400 });
@@ -25,7 +26,7 @@ export async function PATCH(request: NextRequest, context: { params: { id: strin
       ("description" in input && (typeof input.description !== "string" || input.description.length > 2000)) ||
       (["price", "compareAtPrice"].some(k => k in input && (typeof input[k] !== "number" || !Number.isFinite(input[k]) || (input[k] as number) < 0))) ||
       ("stock" in input && (typeof input.stock !== "number" || !Number.isInteger(input.stock) || input.stock < 0)) ||
-      ("image" in input && typeof input.image !== "string") ||
+      ("image" in input && (typeof input.image !== "string" || input.image.length > 2000)) ||
       ("active" in input && typeof input.active !== "boolean")) {
     return NextResponse.json({ ok: false, error: "Product fields are invalid" }, { status: 400 });
   }
