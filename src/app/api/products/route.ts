@@ -20,10 +20,10 @@ function validProduct(value: unknown): value is Record<string, unknown> {
     (p.active === undefined || typeof p.active === "boolean");
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
-    const products = await Product.find({ active: true }).sort({ createdAt: -1 }).lean();
+    const includeInactive = request.nextUrl.searchParams.get("all") === "1" && await isAdminRequest(request);\n    const products = await Product.find(includeInactive ? {} : { active: true }).sort({ createdAt: -1 }).lean();
     return NextResponse.json({ ok: true, products });
   } catch (error) {
     console.error("GET /api/products failed:", error);
