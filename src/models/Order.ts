@@ -10,6 +10,7 @@ const OrderItemSchema = new Schema({
 
 const OrderSchema = new Schema({
   orderNumber: { type: String, required: true, unique: true, index: true },
+  customerUserId: { type: Schema.Types.ObjectId, ref: "User", default: null, index: true },
   customer: {
     name: { type: String, required: true, trim: true, maxlength: 100 },
     phone: { type: String, required: true, trim: true, maxlength: 16 },
@@ -35,6 +36,7 @@ const OrderSchema = new Schema({
 }, { timestamps: true, versionKey: false });
 
 OrderSchema.index({ "customer.phone": 1, createdAt: -1 });
+OrderSchema.index({ customerUserId: 1, createdAt: -1 });
 export type OrderDocument = InferSchemaType<typeof OrderSchema>;
 const Order = (mongoose.models.Order as Model<OrderDocument>) || mongoose.model<OrderDocument>("Order", OrderSchema);
 export default Order;
