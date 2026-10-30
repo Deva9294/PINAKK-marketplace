@@ -18,14 +18,11 @@ export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
     const user = (await User.findById(session.id).select("phone").lean()) as AccountPhone;
-    if (!user) {
-      return NextResponse.json({ ok: false, error: "Account not found" }, { status: 404 });
-    }
+    if (!user) return NextResponse.json({ ok: false, error: "Account not found" }, { status: 404 });
 
-    const orders = await Order.find({ "customer.phone": user.phone })
-      .sort({ createdAt: -1 })
-      .limit(50)
-      .lean();
+    const orders = await Order.find({
+      $or: [{ customerUserId: session.id }, { "customer.phone": user.phone, customerUserId: null }]
+    }).sort({ createdAt: -1 }).limit(50).lean();
 
     return NextResponse.json({ ok: true, orders });
   } catch {
