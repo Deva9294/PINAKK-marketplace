@@ -31,7 +31,7 @@ Generate an auth secret with `openssl rand -base64 48`. Use a long unique admin 
 ## Render deployment
 1. Push this repository to GitHub.
 2. In Render, choose **New → Blueprint** and select this repository. Render reads `render.yaml`.
-3. Enter `MONGODB_URI`, `PINAKK_ADMIN_EMAIL` and `PINAKK_ADMIN_PASSWORD` when Render prompts you. The Blueprint generates `AUTH_SECRET` automatically. It deploys the `feat/complete-pinakk-marketplace` branch in the Singapore region on the Free plan. Use a MongoDB database and allow only the necessary network access from your hosting service.
+3. Enter `MONGODB_URI`, `PINAKK_ADMIN_EMAIL` and `PINAKK_ADMIN_PASSWORD` when Render prompts you. The Blueprint generates `AUTH_SECRET` automatically. It deploys the `main` branch in the Singapore region on the Free plan. Use a MongoDB database and allow only the necessary network access from your hosting service.
 4. Deploy. Render runs `npm install && npm run build` and starts the app with `npm start`.
 5. When deployment succeeds, open `/admin` and sign in with the configured admin email/password.
 6. Check `/api/health` and verify the storefront, admin login and product CRUD before sharing the site.
