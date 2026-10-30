@@ -18,4 +18,6 @@ jobs:
       - run: npm run build
         env:
           MONGODB_URI: mongodb://127.0.0.1:27017/pinakk_build_check
-          PINAKK_ADMIN_EMAIL: admin@example.com\n          PINAKK_ADMIN_PASSWORD: build-check-only-not-a-real-password\n          AUTH_SECRET: build-check-only-secret-with-more-than-32-bytes
+          PINAKK_ADMIN_EMAIL: admin@example.com
+          PINAKK_ADMIN_PASSWORD: build-check-only-not-a-real-password
+          AUTH_SECRET: build-check-only-secret-with-more-than-32-bytes
