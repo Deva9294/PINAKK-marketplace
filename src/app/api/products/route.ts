@@ -36,12 +36,13 @@ export async function GET(request: NextRequest) {
     await connectToDatabase();
     const params = request.nextUrl.searchParams;
     const includeInactive = params.get("all") === "1" && await isAdminRequest(request);
-    const filter: Record<string, unknown> = includeInactive ? {} : { active: true };
+    const filter: Record<string, any> = includeInactive ? {} : { active: true };
     const category = params.get("category")?.trim();
     const brand = params.get("brand")?.trim();
     const search = params.get("q")?.trim();
     const minPrice = params.get("minPrice");
     const maxPrice = params.get("maxPrice");
+
     if (category && category.length <= 80 && category !== "All") filter.category = category;
     if (brand && brand.length <= 100) filter.brand = brand;
     if (search && search.length <= 100) {
@@ -53,6 +54,7 @@ export async function GET(request: NextRequest) {
         { tags: { $regex: escaped, $options: "i" } },
       ];
     }
+
     const price: Record<string, number> = {};
     if (minPrice && Number.isFinite(Number(minPrice)) && Number(minPrice) >= 0) price.$gte = Number(minPrice);
     if (maxPrice && Number.isFinite(Number(maxPrice)) && Number(maxPrice) >= 0) price.$lte = Number(maxPrice);
@@ -66,11 +68,16 @@ export async function GET(request: NextRequest) {
       sortKey === "price-high" ? { price: -1 } :
       sortKey === "oldest" ? { createdAt: 1 } :
       { createdAt: -1 };
+
     const [products, total] = await Promise.all([
       Product.find(filter).sort(sort).skip((page - 1) * limit).limit(limit).lean(),
       Product.countDocuments(filter),
     ]);
-    return NextResponse.json({ ok: true, products, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
+    return NextResponse.json({
+      ok: true,
+      products,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
   } catch (error) {
     console.error("GET /api/products failed:", error);
     return NextResponse.json({ ok: false, error: "Product service is temporarily unavailable" }, { status: 503 });
