@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   description:
     "Shop stationery, school books, notebooks, office supplies, printing paper, school bags, tarpaulin, nets and everyday essentials at PINAKK, Rehti.",
   applicationName: "PINAKK",
+  icons: { icon: "/pinakk-logo.svg", shortcut: "/pinakk-logo.svg" },
   keywords: [
     "PINAKK",
     "stationery online",
