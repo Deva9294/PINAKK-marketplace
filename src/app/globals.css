@@ -127,3 +127,30 @@
 .pinakk-account .pa-status.delivered{background:#e6f5eb;color:#237244}.pinakk-account .pa-status.cancelled{background:#fce9e7;color:#a33d34}
 .pinakk-account .pa-footer{max-width:1180px;margin:28px auto 0;color:#87909e;font-size:12px}
 @media(max-width:650px){.pinakk-account{padding:14px}.pinakk-account-header{margin-bottom:22px;padding:14px}.pinakk-account-summary{grid-template-columns:1fr}.pinakk-account-welcome{align-items:flex-start;flex-direction:column}.pinakk-account-orders{padding:15px}.pinakk-account-orders>article{flex-direction:column}.pinakk-order-meta{align-items:flex-start}.pinakk-account-card{padding:24px;margin-top:5vh}}
+
+/* PINAKK new sun-bow identity and familiar marketplace shopping layout */
+.pinakk-redesign .pr-logo{gap:9px;min-width:180px}
+.pinakk-redesign .pr-logo-mark{width:54px;height:54px;display:grid;place-items:center;flex:none;background:#071426;border:1px solid #d8a83c;border-radius:13px;box-shadow:0 5px 15px #07142620;overflow:hidden}
+.pinakk-redesign .pr-logo-mark svg{display:block;width:52px;height:52px}
+.pinakk-redesign .pr-logo b{font-family:Arial,sans-serif;font-size:27px;font-weight:900;letter-spacing:.12em;color:#101b2d}
+.pinakk-redesign .pr-logo small{font-size:8px;letter-spacing:.17em;color:#a77a28}
+.pinakk-redesign .pr-header{position:sticky;top:0;z-index:30;background:#fff}
+.pinakk-redesign .pr-nav{position:relative;z-index:20;background:#f8f9fb}
+.pinakk-redesign .pr-nav a{font-weight:700;letter-spacing:.045em}
+.pinakk-redesign .pr-search{border:2px solid #d9ad55;border-radius:5px}
+.pinakk-redesign .pr-search button{background:#d9ad55;color:#071426;font-weight:900}
+.pinakk-redesign .pr-cart>b{background:#d9ad55;color:#071426}
+.pinakk-redesign .pr-product{border-radius:7px;box-shadow:0 2px 9px #07142608}
+.pinakk-redesign .pr-product-photo{background:#f5f6f8}
+.pinakk-redesign .pr-product-photo img{object-fit:contain;padding:8px}
+.pinakk-redesign .pr-product-info h3{font-family:Arial,sans-serif;font-weight:700}
+.pinakk-redesign .pr-product-bottom button{border-radius:4px}
+.pinakk-redesign .pr-category-photo img{object-fit:cover}
+.pinakk-redesign .pr-hero-image{border-radius:7px}
+@media(max-width:650px){
+ .pinakk-redesign .pr-logo{min-width:0;gap:7px}
+ .pinakk-redesign .pr-logo-mark{width:42px;height:42px;border-radius:10px}
+ .pinakk-redesign .pr-logo-mark svg{width:41px;height:41px}
+ .pinakk-redesign .pr-logo b{font-size:21px}
+ .pinakk-redesign .pr-logo small{font-size:6px;letter-spacing:.12em}
+}
