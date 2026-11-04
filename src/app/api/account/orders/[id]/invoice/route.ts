@@ -27,7 +27,7 @@ export async function GET(request:NextRequest,context:{params:Promise<{id:string
   const settings=await InvoiceSettings.findOne({key:"default"}).lean()||{legalName:"PINAKK",gstin:"",address:"",state:"Madhya Pradesh",stateCode:"23",phone:"",email:"",invoicePrefix:"PIN",defaultGstRate:0,pricesIncludeGst:true};
   const invoiceNo=(order as any).invoiceNumber||settings.invoicePrefix+"-"+new Date(order.createdAt).getFullYear()+"-"+String(order.orderNumber).slice(-8);
   if(!(order as any).invoiceNumber)await Order.updateOne({_id:id,invoiceNumber:{$exists:false}},{$set:{invoiceNumber:invoiceNo}});
-  const sameState=String(order.address?.state||"").trim().toLowerCase()===String(settings.state||"").trim().toLowerCase();
+  const sameState=order.fulfillmentMethod==="pickup"||String(order.address?.state||"").trim().toLowerCase()===String(settings.state||"").trim().toLowerCase();
   let taxable=0,cgst=0,sgst=0,igst=0;
   const lines=["TAX INVOICE",settings.legalName||"PINAKK",settings.address||"Seller address not configured","GSTIN: "+(settings.gstin||"Not configured"),"State: "+settings.state+"  Code: "+settings.stateCode,"Invoice: "+invoiceNo,"Date: "+new Date(order.createdAt).toLocaleDateString("en-IN"),"","BILL TO",order.customer?.name||"Customer",order.customer?.phone||"",order.customer?.email||"",order.fulfillmentMethod==="delivery"?(order.address?.line1||""):"Store pickup",order.fulfillmentMethod==="delivery"?((order.address?.city||"")+", "+(order.address?.state||"")+" - "+(order.address?.postalCode||"")):"","", "ITEM | QTY | RATE | TAXABLE | HSN | GST"];
   for(const item of order.items){
