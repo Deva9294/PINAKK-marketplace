@@ -7,7 +7,7 @@ import {
   ShoppingBag, Search, ArrowUpRight, Truck, ShieldCheck, Headphones,
   Plus, CheckCircle2, Menu, UserRound, Heart, BookOpen, Pencil,
   Briefcase, Gift, Home, PackageCheck, Phone, MapPin, Tag, Grid3X3,
-  Store, X, Sparkles, ArrowRight, Instagram, Mail
+  Store, X, Sparkles, ArrowRight, Mail
 } from "lucide-react";
 import { products as demoProducts, categories, Product } from "@/lib/products";
 
@@ -266,9 +266,9 @@ export default function Storefront() {
 
       <footer className="pk-footer" id="pk-support">
         <div className="pk-footer-main">
-          <div className="pk-footer-about"><Brand /><p>Your everyday destination for stationery, school books, printing paper, bags, tarpaulin, nets and useful lifestyle essentials. Proudly serving Rehti and nearby communities.</p><a href="tel:9685535343"><Phone size={15} /> +91 96855 35343</a><a href="mailto:hello@pinakk.online"><Mail size={15} /> Contact the PINAKK team</a></div>
+          <div className="pk-footer-about"><Brand /><p>Your everyday destination for stationery, school books, printing paper, bags, tarpaulin, nets and useful lifestyle essentials. Proudly serving Rehti and nearby communities.</p><a href="tel:9685535343"><Phone size={15} /> +91 96855 35343</a><a href="https://wa.me/919685535343" target="_blank" rel="noreferrer"><Mail size={15} /> Message us on WhatsApp</a></div>
           <div><b>DISCOVER</b><button onClick={() => chooseCategory("All")}>Shop all products</button><button onClick={() => chooseCategory("Stationery")}>Stationery</button><button onClick={() => chooseCategory("Books")}>Books & courses</button><button onClick={() => chooseCategory("Paper")}>Paper & printing</button><button onClick={() => chooseCategory("Bags")}>School bags</button></div>
-          <div><b>WE'RE HERE TO HELP</b><a href="tel:9685535343">Customer support</a><a href="mailto:hello@pinakk.online?subject=PINAKK%20Order%20Help">Order assistance</a><a href="#pk-support">Shipping information</a><a href="#pk-support">Returns & refunds</a></div>
+          <div><b>WE'RE HERE TO HELP</b><a href="tel:9685535343">Customer support</a><a href="https://wa.me/919685535343" target="_blank" rel="noreferrer">Order assistance on WhatsApp</a><a href="#pk-support">Shipping information</a><a href="#pk-support">Returns & refunds</a></div>
           <div className="pk-footer-note"><b>SHOP WITH CONFIDENCE</b><span><ShieldCheck size={17} /> Secure checkout</span><span><PackageCheck size={17} /> Clear order updates</span><span><Headphones size={17} /> Human support</span><a href="https://www.instagram.com/" target="_blank" rel="noreferrer"><Instagram size={17} /> Follow our updates</a></div>
         </div>
         <div className="pk-footer-bottom"><span>© {new Date().getFullYear()} PINAKK. All rights reserved.</span><span>Powered by <b>DevaCore</b></span><span>Ashish Stationery & Photocopy · Main Road, Rehti</span></div>

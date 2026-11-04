@@ -22,7 +22,6 @@ const structuredData = {
         addressCountry: "IN"
       },
       areaServed: ["Rehti", "Sehore", "Madhya Pradesh", "India"],
-      sameAs: ["https://www.instagram.com/"]
     },
     {
       "@type": "WebSite",
