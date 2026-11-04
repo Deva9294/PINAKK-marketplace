@@ -31,7 +31,7 @@ const OrderSchema = new Schema({
   deliveryBoyId: { type: Schema.Types.ObjectId, ref: "User", default: null, index: true },
   status: { type: String, enum: ["pending", "confirmed", "processing", "ready", "shipped", "delivered", "cancelled"], default: "pending", index: true },
   paymentStatus: { type: String, enum: ["unpaid", "paid", "refunded"], default: "unpaid" },
-  paymentMethod: { type: String, enum: ["pay-at-store", "cash-on-delivery"], default: "pay-at-store" },
+  paymentMethod: { type: String, enum: ["pay-at-store", "cash-on-delivery", "razorpay"], default: "pay-at-store" },
   customerNote: { type: String, trim: true, maxlength: 500 },
 }, { timestamps: true, versionKey: false });
 
