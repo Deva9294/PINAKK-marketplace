@@ -1,14 +1,11 @@
 import mongoose from "mongoose";
 import {NextRequest,NextResponse} from "next/server";
 import {connectToDatabase} from "@/lib/mongodb";
-import {readUserSession} from "@/lib/user-auth";
 import Product from "@/models/Product";
 import InvoiceSettings from "@/models/InvoiceSettings";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 export async function POST(request:NextRequest){
- const session=await readUserSession(request);
- if(!session||session.role!=="customer")return NextResponse.json({ok:false,error:"Sign in to calculate invoice taxes"},{status:401});
  try{
   const body=await request.json();if(!Array.isArray(body.items)||body.items.length<1||body.items.length>20)return NextResponse.json({ok:false,error:"Invalid cart"},{status:400});
   const ids=body.items.map((x:any)=>String(x.productId||""));
