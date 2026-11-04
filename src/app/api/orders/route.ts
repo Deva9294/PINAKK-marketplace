@@ -6,6 +6,7 @@ import { readUserSession } from "@/lib/user-auth";
 import Product from "@/models/Product";
 import Order from "@/models/Order";
 import User from "@/models/User";
+import Coupon from "@/models/Coupon";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
   }
 
   const reserved: Array<{ id: string; quantity: number }> = [];
+  let reservedCouponId: string | null = null;
   async function releaseStock() {
     for (const item of reserved) {
       await Product.updateOne({ _id: item.id }, { $inc: { stock: item.quantity } });
@@ -93,6 +95,33 @@ export async function POST(request: NextRequest) {
       return { productId: p._id, name: p.name, image: p.image || "", unitPrice: p.price, quantity };
     });
     const subtotal = orderItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+    let couponCode = "";
+    let discount = 0;
+    if (body.couponCode) {
+      couponCode = typeof body.couponCode === "string" ? body.couponCode.trim().toUpperCase() : "";
+      if (!/^[A-Z0-9_-]{3,32}$/.test(couponCode)) {
+        await releaseStock();
+        return NextResponse.json({ ok: false, error: "Coupon code is invalid" }, { status: 400 });
+      }
+      const coupon = await Coupon.findOne({ code: couponCode, active: true });
+      const now = new Date();
+      if (!coupon || (coupon.startsAt && coupon.startsAt > now) || (coupon.expiresAt && coupon.expiresAt < now) ||
+          (coupon.usageLimit > 0 && coupon.usedCount >= coupon.usageLimit) || subtotal < coupon.minSubtotal) {
+        await releaseStock();
+        return NextResponse.json({ ok: false, error: "Coupon is no longer valid for this order" }, { status: 409 });
+      }
+      const rawDiscount = coupon.discountType === "percentage" ? subtotal * coupon.discountValue / 100 : coupon.discountValue;
+      discount = Math.round(Math.min(subtotal, coupon.maxDiscount > 0 ? Math.min(rawDiscount, coupon.maxDiscount) : rawDiscount) * 100) / 100;
+      const claimed = await Coupon.findOneAndUpdate(
+        { _id: coupon._id, active: true, $or: [{ usageLimit: 0 }, { $expr: { $lt: ["$usedCount", "$usageLimit"] } }] },
+        { $inc: { usedCount: 1 } }, { new: true }
+      );
+      if (!claimed) {
+        await releaseStock();
+        return NextResponse.json({ ok: false, error: "Coupon usage limit has been reached" }, { status: 409 });
+      }
+      reservedCouponId = String(coupon._id);
+    }
     const order = await Order.create({
       orderNumber: "PK" + Date.now().toString(36).toUpperCase() + randomBytes(3).toString("hex").toUpperCase(),
       ...(session ? { customerUserId: session.id } : {}),
@@ -102,14 +131,16 @@ export async function POST(request: NextRequest) {
         line1: body.address.line1.trim(), line2: typeof body.address.line2 === "string" ? body.address.line2.trim() : "",
         city: body.address.city.trim(), state: body.address.state.trim(), postalCode: body.address.postalCode,
       } } : {}),
-      items: orderItems, subtotal, deliveryFee: 0, total: subtotal,
+      items: orderItems, subtotal, deliveryFee: 0, couponCode, discount, total: Math.max(0, subtotal - discount),
       paymentMethod: method === "delivery" ? "cash-on-delivery" : "pay-at-store",
       customerNote: typeof body.customerNote === "string" ? body.customerNote.slice(0, 500) : "",
     });
     reserved.length = 0; // Stock is now committed to the saved order.
+    reservedCouponId = null; // Coupon usage is committed with the saved order.
     return NextResponse.json({ ok: true, order: { orderNumber: order.orderNumber, status: order.status, paymentStatus: order.paymentStatus, subtotal: order.subtotal, total: order.total, createdAt: order.createdAt } }, { status: 201 });
   } catch (error) {
     try { await releaseStock(); } catch (rollbackError) { console.error("Order stock rollback failed:", rollbackError); }
+    if (reservedCouponId) { try { await Coupon.updateOne({ _id: reservedCouponId }, { $inc: { usedCount: -1 } }); } catch (rollbackError) { console.error("Coupon usage rollback failed:", rollbackError); } }
     console.error("POST /api/orders failed:", error);
     return NextResponse.json({ ok: false, error: "Order service is temporarily unavailable" }, { status: 503 });
   }
