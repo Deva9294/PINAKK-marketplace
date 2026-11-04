@@ -27,6 +27,8 @@ const OrderSchema = new Schema({
   items: { type: [OrderItemSchema], required: true, validate: [(v: unknown[]) => v.length > 0 && v.length <= 20, "Order must contain 1–20 items"] },
   subtotal: { type: Number, required: true, min: 0 },
   deliveryFee: { type: Number, required: true, default: 0, min: 0 },
+  couponCode: { type: String, trim: true, uppercase: true, maxlength: 32, default: "" },
+  discount: { type: Number, default: 0, min: 0 },
   total: { type: Number, required: true, min: 0 },
   deliveryBoyId: { type: Schema.Types.ObjectId, ref: "User", default: null, index: true },
   status: { type: String, enum: ["pending", "confirmed", "processing", "ready", "shipped", "delivered", "cancelled"], default: "pending", index: true },
