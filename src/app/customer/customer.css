@@ -1,0 +1,128 @@
+/* Customer sign-in and account UI: isolated from storefront and admin styles. */
+.pinakk-customer-page {
+  box-sizing: border-box;
+  min-height: 100svh;
+  width: 100%;
+  padding: 24px max(16px, calc((100% - 1180px) / 2));
+  background: #f8fafc !important;
+  color: #172033 !important;
+  font-family: Inter, Arial, Helvetica, sans-serif !important;
+}
+.pinakk-customer-page *,
+.pinakk-customer-page *::before,
+.pinakk-customer-page *::after { box-sizing: border-box; }
+.pinakk-customer-page .pinakk-account-card {
+  display: block;
+  width: min(100%, 440px);
+  margin: clamp(24px, 7vh, 64px) auto;
+  padding: clamp(22px, 5vw, 34px);
+  border: 1px solid #e3e9f2 !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+  color: #172033 !important;
+  box-shadow: 0 14px 38px rgba(23, 32, 51, .09) !important;
+}
+.pinakk-customer-page .pinakk-account-card h1 {
+  margin: 8px 0 7px;
+  color: #172033 !important;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.pinakk-customer-page .pinakk-account-card > p {
+  margin: 8px 0 18px;
+  color: #697386 !important;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.pinakk-customer-page .pinakk-account-card form {
+  display: grid;
+  gap: 15px;
+  margin: 22px 0 14px;
+}
+.pinakk-customer-page .pinakk-account-card label {
+  display: grid;
+  gap: 8px;
+  color: #344054 !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+.pinakk-customer-page .pinakk-account-card input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #d6deea !important;
+  border-radius: 10px !important;
+  outline: none;
+  background: #fff !important;
+  color: #172033 !important;
+  font: inherit;
+  font-size: 14px;
+  box-shadow: none;
+}
+.pinakk-customer-page .pinakk-account-card input:focus {
+  border-color: #1e40af !important;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, .12) !important;
+}
+.pinakk-customer-page .pinakk-account-card form > button {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: #1e40af !important;
+  color: #fff !important;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.pinakk-customer-page .pinakk-account-card form > button:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+.pinakk-customer-page .pinakk-text-button {
+  display: block;
+  width: 100%;
+  margin: 12px 0;
+  padding: 9px 4px;
+  border: 0;
+  background: transparent !important;
+  color: #1e40af !important;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  text-align: center;
+  cursor: pointer;
+}
+.pinakk-customer-page .pinakk-account-card > small {
+  display: block;
+  margin-top: 12px;
+  color: #7b8798 !important;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.pinakk-customer-page .pa-back {
+  color: #1e40af !important;
+}
+.pinakk-customer-page .pinakk-account-header {
+  background: #1e40af !important;
+  color: #fff !important;
+}
+.pinakk-customer-page .pinakk-account-header button {
+  background: #ff7a00 !important;
+  color: #fff !important;
+}
+@media (max-width: 600px) {
+  .pinakk-customer-page { padding: 14px 12px; }
+  .pinakk-customer-page .pinakk-account-card {
+    margin: 22px auto;
+    padding: 23px 19px;
+    border-radius: 15px !important;
+  }
+  .pinakk-customer-page .pinakk-account-card h1 { font-size: 23px; }
+  .pinakk-customer-page .pinakk-account-card input { min-height: 46px; }
+}
