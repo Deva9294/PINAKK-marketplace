@@ -30,8 +30,7 @@ export default function CheckoutPage(){
    const data=await response.json();if(!response.ok)throw new Error(data.error||"Could not start online payment");
    if(!(window as any).Razorpay){
     await new Promise<void>((resolve,reject)=>{
-     const existing=document.querySelector<HTMLScriptElement>('script[data-razorpay-checkout]');
-     if(existing){existing.addEventListener("load",()=>resolve(),{once:true});existing.addEventListener("error",()=>reject(new Error("Razorpay checkout could not be loaded")),{once:true});return}
+     const existing=document.querySelector<HTMLScriptElement>('script[data-razorpay-checkout]');if(existing)existing.remove();
      const script=document.createElement("script");script.src="https://checkout.razorpay.com/v1/checkout.js";script.async=true;script.dataset.razorpayCheckout="true";script.onload=()=>resolve();script.onerror=()=>reject(new Error("Razorpay checkout could not be loaded"));document.body.appendChild(script);
     });
    }
@@ -49,7 +48,7 @@ export default function CheckoutPage(){
       }catch(error){setPaymentError(error instanceof Error?error.message:"Payment verification failed. Please contact the store with your order number")}
       finish();
      },
-     modal:{ondismiss:()=>{setPaymentError("Payment window was closed. Your order is saved as unpaid; you can retry online payment.")}}
+     modal:{ondismiss:()=>{setPaymentError("Payment window was closed. Your order is saved as unpaid; you can retry online payment.");finish()}}
     });
     checkout.on("payment.failed",(event:any)=>{setPaymentError(event?.error?.description||"Payment failed. You can retry online payment.");finish()});
     checkout.open();
