@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     const orderItems = products.map(p => {
       const quantity = quantities.get(String(p._id))!;
-      return { productId: p._id, name: p.name, image: p.image || "", unitPrice: p.price, gstRate: Number((p as any).gstRate ?? 0), hsnCode: (p as any).hsnCode || "", quantity };
+      return { productId: p._id, name: p.name, image: p.image || "", unitPrice: p.price, gstRate: (p as any).gstRate, hsnCode: (p as any).hsnCode || "", quantity };
     });
     const subtotal = orderItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
     let couponCode = "";
