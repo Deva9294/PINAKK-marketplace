@@ -5,6 +5,8 @@ const OrderItemSchema = new Schema({
   name: { type: String, required: true, trim: true, maxlength: 160 },
   image: { type: String, default: "", maxlength: 2000 },
   unitPrice: { type: Number, required: true, min: 0 },
+  gstRate: { type: Number, min: 0, max: 100 },
+  hsnCode: { type: String, trim: true, maxlength: 8, default: "" },
   quantity: { type: Number, required: true, min: 1, max: 20 },
 }, { _id: false });
 
@@ -26,6 +28,10 @@ const OrderSchema = new Schema({
   },
   items: { type: [OrderItemSchema], required: true, validate: [(v: unknown[]) => v.length > 0 && v.length <= 20, "Order must contain 1–20 items"] },
   subtotal: { type: Number, required: true, min: 0 },
+  invoiceNumber: { type: String, trim: true, maxlength: 40, index: true },
+  taxableValue: { type: Number, default: 0, min: 0 },
+  taxTotal: { type: Number, default: 0, min: 0 },
+  pricesIncludeGst: { type: Boolean, default: true },
   deliveryFee: { type: Number, required: true, default: 0, min: 0 },
   couponCode: { type: String, trim: true, uppercase: true, maxlength: 32, default: "" },
   discount: { type: Number, default: 0, min: 0 },

@@ -8,6 +8,7 @@ import Order from "@/models/Order";
 import User from "@/models/User";
 import Coupon from "@/models/Coupon";
 import ShippingSettings from "@/models/ShippingSettings";
+import InvoiceSettings from "@/models/InvoiceSettings";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     const orderItems = products.map(p => {
       const quantity = quantities.get(String(p._id))!;
-      return { productId: p._id, name: p.name, image: p.image || "", unitPrice: p.price, quantity };
+      return { productId: p._id, name: p.name, image: p.image || "", unitPrice: p.price, gstRate: (p as any).gstRate, hsnCode: (p as any).hsnCode || "", quantity };
     });
     const subtotal = orderItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
     let couponCode = "";
@@ -142,8 +143,24 @@ export async function POST(request: NextRequest) {
       const freeAbove = matchingZone ? matchingZone.freeAbove : (settings?.defaultFreeAbove ?? 0);
       deliveryFee = freeAbove > 0 && subtotal - discount >= freeAbove ? 0 : fee;
     }
+    const invoiceSettings = await InvoiceSettings.findOne({ key: "default" }).lean() || { defaultGstRate: 0, pricesIncludeGst: true, invoicePrefix: "PIN" };
+    let taxableValue = 0;
+    let taxTotal = 0;
+    for (const item of orderItems) {
+      const gross = item.unitPrice * item.quantity;
+      const net = Math.max(0, gross - (subtotal > 0 ? discount * gross / subtotal : 0));
+      const rate = item.gstRate ?? Number(invoiceSettings.defaultGstRate || 0);
+      const taxable = invoiceSettings.pricesIncludeGst ? net / (1 + rate / 100) : net;
+      const tax = invoiceSettings.pricesIncludeGst ? net - taxable : taxable * rate / 100;
+      taxableValue += taxable;
+      taxTotal += tax;
+    }
+    taxableValue = Math.round(taxableValue * 100) / 100;
+    taxTotal = Math.round(taxTotal * 100) / 100;
+    const invoiceNumber = String(invoiceSettings.invoicePrefix || "PIN") + "-" + new Date().getFullYear() + "-" + Date.now().toString(36).toUpperCase();
     const order = await Order.create({
       orderNumber: "PK" + Date.now().toString(36).toUpperCase() + randomBytes(3).toString("hex").toUpperCase(),
+      invoiceNumber, taxableValue, taxTotal, pricesIncludeGst: invoiceSettings.pricesIncludeGst,
       ...(session ? { customerUserId: session.id } : {}),
       customer: savedCustomer,
       fulfillmentMethod: method,
@@ -151,13 +168,13 @@ export async function POST(request: NextRequest) {
         line1: body.address.line1.trim(), line2: typeof body.address.line2 === "string" ? body.address.line2.trim() : "",
         city: body.address.city.trim(), state: body.address.state.trim(), postalCode: body.address.postalCode,
       } } : {}),
-      items: orderItems, subtotal, deliveryFee, couponCode, discount, total: Math.max(0, subtotal - discount) + deliveryFee,
+      items: orderItems, subtotal, deliveryFee, couponCode, discount, total: Math.max(0, subtotal - discount) + deliveryFee + (invoiceSettings.pricesIncludeGst ? 0 : taxTotal),
       paymentMethod: method === "delivery" ? "cash-on-delivery" : "pay-at-store",
       customerNote: typeof body.customerNote === "string" ? body.customerNote.slice(0, 500) : "",
     });
     reserved.length = 0; // Stock is now committed to the saved order.
     reservedCouponId = null; // Coupon usage is committed with the saved order.
-    return NextResponse.json({ ok: true, order: { orderNumber: order.orderNumber, status: order.status, paymentStatus: order.paymentStatus, subtotal: order.subtotal, deliveryFee: order.deliveryFee, discount: order.discount, total: order.total, createdAt: order.createdAt } }, { status: 201 });
+    return NextResponse.json({ ok: true, order: { orderNumber: order.orderNumber, status: order.status, paymentStatus: order.paymentStatus, subtotal: order.subtotal, deliveryFee: order.deliveryFee, discount: order.discount, taxableValue: order.taxableValue, taxTotal: order.taxTotal, total: order.total, invoiceNumber: order.invoiceNumber, createdAt: order.createdAt } }, { status: 201 });
   } catch (error) {
     try { await releaseStock(); } catch (rollbackError) { console.error("Order stock rollback failed:", rollbackError); }
     if (reservedCouponId) { try { await Coupon.updateOne({ _id: reservedCouponId }, { $inc: { usedCount: -1 } }); } catch (rollbackError) { console.error("Coupon usage rollback failed:", rollbackError); } }

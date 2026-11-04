@@ -34,7 +34,7 @@ export async function PATCH(request: NextRequest, context: Context) {
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
   }
-  const allowed = ["name", "slug", "sku", "category", "subcategory", "brand", "description", "price", "compareAtPrice", "image", "images", "specifications", "tags", "stock", "active"];
+  const allowed = ["name", "slug", "sku", "category", "subcategory", "brand", "description", "price", "compareAtPrice", "gstRate", "hsnCode", "image", "images", "specifications", "tags", "stock", "active"];
   const update: Record<string, unknown> = {};
   for (const key of allowed) if (Object.prototype.hasOwnProperty.call(body, key)) update[key] = body[key];
   if (!Object.keys(update).length) return NextResponse.json({ ok: false, error: "No editable product fields supplied" }, { status: 400 });
@@ -42,6 +42,8 @@ export async function PATCH(request: NextRequest, context: Context) {
   if (typeof update.slug === "string" && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(update.slug)) return NextResponse.json({ ok: false, error: "Invalid product slug" }, { status: 400 });
   if (typeof update.category === "string" && (!update.category.trim() || update.category.length > 80)) return NextResponse.json({ ok: false, error: "Invalid product category" }, { status: 400 });
   if (typeof update.price === "number" && (!Number.isFinite(update.price) || update.price < 0)) return NextResponse.json({ ok: false, error: "Invalid product price" }, { status: 400 });
+  if (typeof update.gstRate === "number" && (!Number.isFinite(update.gstRate) || update.gstRate < 0 || update.gstRate > 100)) return NextResponse.json({ ok: false, error: "Invalid GST rate" }, { status: 400 });
+  if (typeof update.hsnCode === "string" && update.hsnCode.length > 8) return NextResponse.json({ ok: false, error: "Invalid HSN code" }, { status: 400 });
   if (typeof update.stock === "number" && (!Number.isInteger(update.stock) || update.stock < 0)) return NextResponse.json({ ok: false, error: "Invalid product stock" }, { status: 400 });
   try {
     await connectToDatabase();

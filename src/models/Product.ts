@@ -9,6 +9,8 @@ const ProductSchema = new Schema({
   brand: { type: String, trim: true, maxlength: 100, default: "", index: true },
   description: { type: String, required: true, trim: true, maxlength: 5000 },
   price: { type: Number, required: true, min: 0 },
+  gstRate: { type: Number, min: 0, max: 100 },
+  hsnCode: { type: String, trim: true, maxlength: 8, default: "" },
   compareAtPrice: { type: Number, min: 0 },
   image: { type: String, default: "" },
   images: { type: [String], default: [] },
