@@ -18,8 +18,9 @@ function safeEqualHex(left: string, right: string) {
 export async function POST(request: NextRequest) {
   const session = await readUserSession(request);
   if (!session || session.role !== "customer") return NextResponse.json({ ok: false, error: "Customer sign-in required" }, { status: 401 });
+  const keyId = process.env.RAZORPAY_KEY_ID;
   const secret = process.env.RAZORPAY_KEY_SECRET;
-  if (!secret) return NextResponse.json({ ok: false, error: "Online payment is not configured" }, { status: 503 });
+  if (!keyId || !secret) return NextResponse.json({ ok: false, error: "Online payment is not configured" }, { status: 503 });
 
   let body: any;
   try { body = await request.json(); } catch { return NextResponse.json({ ok: false, error: "Invalid request" }, { status: 400 }); }
@@ -39,6 +40,18 @@ export async function POST(request: NextRequest) {
     if (payment.status === "paid") return NextResponse.json({ ok: true, verified: true, orderNumber: payment.orderNumber });
     const order = await Order.findOne({ _id: payment.orderId, customerUserId: session.id });
     if (!order || order.status === "cancelled") return NextResponse.json({ ok: false, error: "Order is unavailable" }, { status: 409 });
+
+    // A valid checkout signature alone is not treated as proof of capture.
+    const gatewayResponse = await fetch("https://api.razorpay.com/v1/payments/" + encodeURIComponent(paymentId), {
+      headers: { Authorization: "Basic " + Buffer.from(keyId + ":" + secret).toString("base64") },
+      cache: "no-store",
+    });
+    const gatewayPayment = await gatewayResponse.json() as { id?: string; order_id?: string; amount?: number; currency?: string; status?: string };
+    if (!gatewayResponse.ok || gatewayPayment.order_id !== orderId ||
+        gatewayPayment.amount !== payment.amount || gatewayPayment.currency !== "INR" ||
+        gatewayPayment.status !== "captured") {
+      return NextResponse.json({ ok: false, error: "Payment is not captured yet. Your order remains unpaid." }, { status: 409 });
+    }
 
     payment.razorpayPaymentId = paymentId;
     payment.signature = signature;

@@ -30,6 +30,10 @@ export async function POST(request: NextRequest) {
     if (!order) return NextResponse.json({ ok: true, ignored: true });
 
     if (event.event === "payment.captured" || event.event === "order.paid") {
+      if (entity.amount !== payment.amount || entity.currency !== "INR") {
+        console.error("Razorpay webhook amount/currency mismatch for", payment.orderNumber);
+        return NextResponse.json({ ok: false, error: "Payment amount mismatch" }, { status: 400 });
+      }
       if (payment.status !== "paid") {
         payment.status = "paid";
         payment.razorpayPaymentId = entity.id || payment.razorpayPaymentId;
