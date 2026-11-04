@@ -26,19 +26,25 @@ export async function POST(request: NextRequest) {
       await connectToDatabase();
       const payment = await Payment.findOne({ razorpayPaymentId: refundEntity.payment_id });
       if (!payment) return NextResponse.json({ ok: true, ignored: true });
-      const order = await Order.findById(payment.orderId);
-      if (!order) return NextResponse.json({ ok: true, ignored: true });
       const refundStatus = refundEntity.status === "processed" ? "processed"
         : refundEntity.status === "failed" ? "failed" : "pending";
-      payment.refundId = refundEntity.id || payment.refundId;
-      payment.refundStatus = refundStatus;
-      payment.refundAmount = Number(refundEntity.amount || payment.refundAmount || 0);
-      await payment.save();
-      if (refundStatus === "processed" && payment.refundAmount >= payment.amount) {
-        order.paymentStatus = "refunded";
-        await order.save();
+      const updateFilter = refundStatus === "processed"
+        ? { _id: payment._id }
+        : refundStatus === "failed"
+          ? { _id: payment._id, refundStatus: { $ne: "processed" } }
+          : { _id: payment._id, refundStatus: { $nin: ["processed", "failed"] } };
+      await Payment.updateOne(updateFilter, {
+        $set: {
+          refundId: refundEntity.id || payment.refundId,
+          refundStatus,
+          refundAmount: Number(refundEntity.amount || payment.refundAmount || 0),
+        },
+      });
+      const currentPayment = await Payment.findById(payment._id);
+      if (currentPayment?.refundStatus === "processed" && currentPayment.refundAmount >= currentPayment.amount) {
+        await Order.updateOne({ _id: currentPayment.orderId, paymentStatus: "paid" }, { $set: { paymentStatus: "refunded" } });
       }
-      return NextResponse.json({ ok: true, refundStatus });
+      return NextResponse.json({ ok: true, refundStatus: currentPayment?.refundStatus || refundStatus });
     }
 
     const entity = event?.payload?.payment?.entity;
