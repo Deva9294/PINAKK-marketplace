@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
     for (const item of orderItems) {
       const gross = item.unitPrice * item.quantity;
       const net = Math.max(0, gross - (subtotal > 0 ? discount * gross / subtotal : 0));
-      const rate = item.gstRate || Number(invoiceSettings.defaultGstRate || 0);
+      const rate = item.gstRate ?? Number(invoiceSettings.defaultGstRate || 0);
       const taxable = invoiceSettings.pricesIncludeGst ? net / (1 + rate / 100) : net;
       const tax = invoiceSettings.pricesIncludeGst ? net - taxable : taxable * rate / 100;
       taxableValue += taxable;
