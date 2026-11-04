@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* PINAKK — original editorial storefront design */
 .pinakk-store{--pk-blue:#1e40af;--pk-orange:#ff7a00;--pk-ink:#172033;--pk-muted:#697386;--pk-paper:#f8fafc;--pk-line:#e8edf4;min-height:100vh;background:var(--pk-paper);color:var(--pk-ink);font-family:Inter,Arial,Helvetica,sans-serif;padding-bottom:0}
 .pinakk-store *{box-sizing:border-box}.pinakk-store a{color:inherit;text-decoration:none}.pinakk-store button,.pinakk-store input{font:inherit}
@@ -53,3 +57,124 @@
 .pinakk-track-steps .done i{background:#1e40af;border-color:#1e40af;box-shadow:0 0 0 4px #1e40af18}
 .pa-track-link{display:inline-flex;align-items:center;gap:6px;color:#1e40af;font-size:10px;font-weight:800;text-decoration:none;margin-top:7px}
 @media(max-width:650px){.pinakk-live-map{height:290px}.pinakk-map-caption{align-items:flex-start;flex-direction:column}.pinakk-track-steps{gap:2px}.pinakk-track-steps>div{font-size:7px}}
+
+
+/* Shared account, authentication and admin portal layouts */
+.pinakk-account{min-height:100vh;padding:24px max(16px,calc((100% - 1180px)/2));font-family:Inter,Arial,sans-serif;color:#172033;background:#f8fafc}
+.pa-back{display:inline-flex;align-items:center;gap:8px;color:#1e40af;font-size:13px;font-weight:700;text-decoration:none;margin:4px 0 20px}
+.pa-logo{display:flex;align-items:center;gap:2px;font-size:25px;font-weight:900;letter-spacing:1px;color:#1e40af;margin-bottom:16px}
+.pa-logo span{color:#172033}
+.pinakk-account-card{width:min(100%,440px);margin:36px auto;padding:30px;background:#fff;border:1px solid #e5eaf2;border-radius:18px;box-shadow:0 12px 35px #1720330c}
+.pinakk-account-card h1{font-size:25px;line-height:1.2;margin:8px 0;color:#172033}
+.pinakk-account-card h2{display:flex;align-items:center;gap:9px;font-size:18px;margin:0 0 18px}
+.pinakk-account-card>p{font-size:13px;color:#6b7688;line-height:1.65;margin:8px 0 18px}
+.pinakk-account-card form{display:grid;gap:14px;margin-top:20px}
+.pinakk-account-card label,.pa-login-card label{display:grid;gap:7px;font-size:12px;font-weight:700;color:#39465c}
+.pinakk-account-card input,.pa-login-card input,.pinakk-account select{width:100%;min-height:43px;border:1px solid #dce3ed;border-radius:9px;padding:10px 12px;background:#fff;color:#172033;outline:none;font:inherit;font-size:13px}
+.pinakk-account-card input:focus,.pa-login-card input:focus{border-color:#1e40af;box-shadow:0 0 0 3px #1e40af18}
+.pinakk-account-card form>button,.pa-login-card form>button{min-height:44px;border:0;border-radius:9px;background:#1e40af;color:#fff;font-weight:800;cursor:pointer}
+.pinakk-account-card button:disabled,.pa-login-card button:disabled{opacity:.6;cursor:wait}
+.pinakk-account-body{max-width:1180px;margin:28px auto}
+.pinakk-account-header{min-height:66px;padding:12px 18px;border-radius:13px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.pa-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:900}
+.pa-brand>b{width:38px;height:38px;border-radius:10px;background:#ff7a00;display:grid;place-items:center;color:#fff;font-size:21px}
+.pa-brand span{display:flex;flex-direction:column;gap:3px;letter-spacing:.7px}
+.pa-brand small{font-size:8px;letter-spacing:1px;opacity:.75}
+.pinakk-account-header button,.pinakk-account-welcome>a,.pinakk-account-welcome>button,.pa-primary-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:9px;padding:10px 14px;background:#1e40af;color:#fff;text-decoration:none;font-size:12px;font-weight:800;cursor:pointer}
+.pinakk-account-welcome{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:28px 0 20px}
+.pinakk-account-welcome small{font-size:10px;font-weight:850;letter-spacing:1.3px}
+.pinakk-account-welcome h1{font-size:clamp(25px,4vw,34px);margin:7px 0;color:#172033}
+.pinakk-account-welcome p{font-size:13px;color:#748095;margin:0}
+.pinakk-account-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0}
+.pinakk-account-summary article{background:#fff;border:1px solid #e5eaf2;padding:18px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.pinakk-account-summary article svg{color:#1e40af;width:22px;height:22px}
+.pinakk-account-summary article small,.pinakk-account-summary article span{font-size:11px;color:#7b8798}
+.pinakk-account-summary article b{font-size:20px;overflow-wrap:anywhere}
+.pinakk-account-orders{background:#fff;border:1px solid #e5eaf2;padding:20px;margin:18px 0}
+.pinakk-account-orders>div:first-child{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pinakk-account-orders h2{font-size:18px;margin:0 0 15px}
+.pinakk-account-orders>div:first-child button{display:inline-flex;align-items:center;gap:7px;border:0;padding:9px 12px;cursor:pointer}
+.pinakk-account-orders>article{display:flex;justify-content:space-between;gap:20px;padding:16px 0;border-top:1px solid #edf0f5}
+.pinakk-account-orders article>div:first-child{min-width:0}
+.pinakk-account-orders article b{font-size:13px}
+.pinakk-account-orders article small{display:block;color:#7b8798;font-size:10px;margin-top:5px}
+.pinakk-account-orders article p{font-size:11px;color:#596579;line-height:1.6}
+.pinakk-order-meta{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0;font-size:12px}
+.pinakk-order-meta button{border:0;border-radius:8px;background:#1e40af;color:white;padding:9px 12px;font-size:11px;font-weight:750}
+.pa-status{display:inline-flex;border-radius:20px;padding:5px 9px;background:#eef2f7;color:#536176;font-size:9px;font-weight:800;text-transform:capitalize}
+.pa-status.live,.pa-status.delivered{background:#e7f7ed;color:#168044}
+.pa-status.pending,.pa-status.ready{background:#fff4df;color:#a35b00}
+.pa-status.cancelled{background:#ffeded;color:#bd3434}
+.pa-error,.pa-success{padding:11px 13px;border-radius:9px;font-size:12px;line-height:1.5;margin:12px 0}
+.pa-error{background:#fff0f0;color:#b42318;border:1px solid #ffd6d6}
+.pa-success{background:#eaf8ef;color:#16733b;border:1px solid #ccebd6}
+.pa-muted{color:#7b8798;font-size:12px}
+.pa-primary-link{margin:8px 0}
+.pa-footer{max-width:1180px;margin:35px auto 0;padding:18px 0;border-top:1px solid #e5eaf2;color:#8791a1;font-size:10px;display:flex;justify-content:space-between;gap:12px}
+.pinakk-checkout-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.pa-checkout-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #edf0f5}
+.pa-checkout-item small{display:block;color:#7b8798;font-size:11px;margin-top:4px}
+.pa-login{display:flex;flex-direction:column}
+.pa-login-card{width:min(100%,430px);margin:45px auto;padding:30px;background:white;border:1px solid #e5eaf2;border-radius:18px;box-shadow:0 12px 35px #1720330c}
+.pa-login-card>small{color:#1e40af;font-size:9px;font-weight:850;letter-spacing:1.3px}
+.pa-login-card h1{font-size:27px;margin:10px 0 5px}
+.pa-login-card>p{font-size:12px;color:#7b8798;margin:0 0 20px}
+.pa-login-card form{display:grid;gap:15px}
+.pa-login-card form>button{margin-top:5px}
+.pa-loading{padding:50px;text-align:center;color:#718096}
+.pa-sidebar{position:fixed;inset:0 auto 0 0;width:245px;padding:22px 15px;background:#172033;color:white;display:flex;flex-direction:column;gap:8px;z-index:20}
+.pa-sidebar .pa-brand{margin:0 7px 28px}
+.pa-nav-label{font-size:9px;letter-spacing:1.3px;color:#9aa7ba;padding:8px}
+.pa-sidebar>button{display:flex;align-items:center;gap:11px;text-align:left;border:0;border-radius:9px;background:transparent;color:#c8d1df;padding:12px;font-size:12px;cursor:pointer}
+.pa-sidebar>button.active{background:#1e40af;color:white}
+.pa-sidebar>button em{margin-left:auto;font-style:normal}
+.pa-sidebar .pa-logout{margin-top:auto;color:#ffb4a5}
+.pa-sidebar-foot{padding:13px 8px;border-top:1px solid #344055;font-size:10px;line-height:1.7}
+.pa-sidebar-foot small{color:#9aa7ba}
+.pa-main{margin-left:245px;min-height:100vh}
+.pa-topbar{height:72px;padding:0 28px;background:white;border-bottom:1px solid #e8edf4;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.pa-crumb{font-size:11px;color:#7b8798}
+.pa-user{display:flex;align-items:center;gap:12px}
+.pa-user>span{font-size:11px}.pa-user>span small{display:block;color:#8791a1;margin-top:3px}
+.pa-user button{border:0;background:#f1f4f9;border-radius:8px;padding:9px}
+.pa-avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#e9efff;color:#1e40af;font-weight:900}
+.pa-delivery-link{font-size:10px;color:#1e40af;text-decoration:none;font-weight:750;white-space:nowrap}
+.pa-content{max-width:1500px;margin:auto;padding:26px 28px}
+.pa-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:22px}
+.pa-heading small{font-size:9px;letter-spacing:1.2px;color:#1e40af;font-weight:850}
+.pa-heading h1{font-size:27px;margin:6px 0}.pa-heading p{font-size:11px;color:#7b8798;margin:0}
+.pa-refresh,.pa-toolbar>button{display:inline-flex;align-items:center;gap:7px;border:1px solid #dce3ed;border-radius:9px;background:white;padding:10px 13px;color:#334155;font-size:11px;font-weight:750;cursor:pointer}
+.pa-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.pa-stats article,.pa-card{background:white;border:1px solid #e5eaf2;border-radius:14px;padding:18px;min-width:0}
+.pa-stats article{display:grid;gap:8px}.pa-stats article small{font-size:10px;color:#7b8798}.pa-stats article>b{font-size:24px}.pa-stats article em{font-size:9px;color:#8791a1;font-style:normal}
+.pa-stat-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:#eef2ff;color:#1e40af}
+.pa-stat-icon.gold{background:#fff4df;color:#b7791f}.pa-stat-icon.green{background:#e7f7ed;color:#168044}.pa-stat-icon.blue{background:#eaf1ff;color:#1e40af}.pa-stat-icon.violet{background:#f2eaff;color:#7542ad}
+.pa-dashboard-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+.pa-card-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;font-size:13px}
+.pa-card-title small{display:block;font-size:10px;color:#8791a1;margin-top:4px}
+.pa-card-title button{border:0;background:none;color:#1e40af;font-size:10px;font-weight:750}
+.pa-chart{height:190px;display:flex;gap:12px;align-items:stretch}
+.pa-ylabels{display:flex;flex-direction:column;justify-content:space-between;color:#9aa4b3;font-size:9px}
+.pa-chart svg{width:100%;height:100%;overflow:visible}
+.pa-chart-months{display:flex;justify-content:space-between;color:#8791a1;font-size:9px;margin:8px 0}
+.pa-recent-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #edf0f5;font-size:10px}
+.pa-recent-row small{display:block;color:#8791a1;margin-top:4px}
+.pa-shortcuts{margin-top:16px}.pa-shortcuts>div{display:flex;gap:10px;flex-wrap:wrap}
+.pa-shortcuts button{display:flex;align-items:center;gap:8px;border:1px solid #e5eaf2;border-radius:9px;background:#fff;padding:11px;color:#334155;font-size:10px}
+.pa-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.pa-search{display:flex;align-items:center;gap:8px;max-width:400px;flex:1;border:1px solid #dce3ed;border-radius:9px;background:white;padding:0 11px}
+.pa-search input{width:100%;height:39px;border:0;outline:0;font-size:11px}
+.pa-primary{display:inline-flex;align-items:center;gap:7px;border:0;padding:10px 13px;color:white;font-size:11px;font-weight:800;cursor:pointer}
+.pa-form-card{margin-bottom:16px}
+.pa-product-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.pa-product-form label{display:grid;gap:6px;color:#596579;font-size:10px;font-weight:750}
+.pa-product-form input,.pa-product-form textarea,.pa-toolbar select,.pa-table select{width:100%;border:1px solid #dce3ed;border-radius:8px;padding:9px;background:white;font:inherit;font-size:11px;color:#172033}
+.pa-wide{grid-column:1/-1}.pa-form-actions{display:flex;justify-content:flex-end}
+.pa-table-wrap{width:100%;overflow:auto}
+.pa-table{width:100%;border-collapse:collapse;min-width:700px;text-align:left;font-size:10px}
+.pa-table th{background:#f7f9fc;color:#687386;font-size:9px;letter-spacing:.5px;text-transform:uppercase}
+.pa-table th,.pa-table td{padding:12px 10px;border-bottom:1px solid #edf0f5;vertical-align:middle}
+.pa-table td small{display:block;color:#8791a1;margin-top:4px}
+.pa-table-action{border:1px solid #dce3ed;border-radius:7px;background:white;padding:6px 8px;margin:2px;color:#1e40af;font-size:9px;font-weight:750;text-decoration:none;cursor:pointer}
+@media(max-width:900px){.pa-sidebar{width:205px}.pa-main{margin-left:205px}.pa-content{padding:20px}.pa-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.pa-dashboard-grid{grid-template-columns:1fr}.pa-user{gap:7px}.pa-delivery-link{display:none}}
+@media(max-width:650px){.pinakk-account{padding:12px}.pinakk-account-card{margin:24px auto;padding:22px}.pinakk-account-body{margin:18px auto}.pinakk-account-welcome{align-items:flex-start;flex-direction:column}.pinakk-account-summary{grid-template-columns:1fr;gap:8px}.pinakk-account-summary article{display:grid;grid-template-columns:28px 1fr;align-items:center;padding:12px}.pinakk-account-summary article svg{grid-row:span 2}.pinakk-account-summary article b{font-size:16px}.pinakk-account-orders{padding:13px}.pinakk-account-orders>article{flex-direction:column;gap:8px}.pinakk-order-meta{align-items:flex-start}.pinakk-checkout-grid{grid-template-columns:1fr}.pa-footer{flex-direction:column}.pa-sidebar{position:static;width:auto;min-height:auto;display:flex;flex-direction:row;align-items:center;overflow:auto;padding:8px}.pa-sidebar .pa-brand{margin:0;flex-shrink:0}.pa-sidebar .pa-brand small,.pa-nav-label,.pa-sidebar-foot{display:none}.pa-sidebar>button{padding:9px;font-size:0;flex-shrink:0}.pa-sidebar .pa-logout{margin:0}.pa-main{margin:0}.pa-topbar{height:auto;min-height:58px;padding:10px 12px}.pa-user>span:not(.pa-avatar){display:none}.pa-content{padding:16px 12px}.pa-heading h1{font-size:22px}.pa-stats{gap:8px}.pa-stats article{padding:12px}.pa-stats article>b{font-size:19px}.pa-toolbar{align-items:stretch;flex-direction:column}.pa-product-form{grid-template-columns:1fr}.pa-wide{grid-column:auto}.pa-recent-row{grid-template-columns:1fr auto}.pa-recent-row .pa-status{grid-column:2}.pa-login-card{margin:22px auto;padding:22px}}
