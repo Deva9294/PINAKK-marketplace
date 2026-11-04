@@ -33,7 +33,7 @@ export async function PUT(request: NextRequest) {
       pincodes: Array.isArray(z?.pincodes) ? [...new Set(z.pincodes.map((p: any) => String(p).trim()))] : [],
       fee: Number(z?.fee), freeAbove: Number(z?.freeAbove || 0), active: z?.active !== false,
     }));
-    if (zones.some((z: any) => !z.name || !z.pincodes.length || z.pincodes.some((p: string) => !/^\\d{6}$/.test(p)) ||
+    if (zones.some((z: any) => !z.name || !z.pincodes.length || z.pincodes.some((p: string) => !/^\d{6}$/.test(p)) ||
         !Number.isFinite(z.fee) || z.fee < 0 || !Number.isFinite(z.freeAbove) || z.freeAbove < 0)) {
       return NextResponse.json({ ok: false, error: "Each zone needs a name, valid 6-digit PIN codes and non-negative charges" }, { status: 400 });
     }
