@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/admin-auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import Product from "@/models/Product";
+import StockMovement from "@/models/StockMovement";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,8 +48,18 @@ export async function PATCH(request: NextRequest, context: Context) {
   if (typeof update.stock === "number" && (!Number.isInteger(update.stock) || update.stock < 0)) return NextResponse.json({ ok: false, error: "Invalid product stock" }, { status: 400 });
   try {
     await connectToDatabase();
+    const previous = typeof update.stock === "number"
+      ? await Product.findById(id).select("name stock").lean()
+      : null;
     const product = await Product.findByIdAndUpdate(id, { $set: update }, { new: true, runValidators: true });
     if (!product) return NextResponse.json({ ok: false, error: "Product not found" }, { status: 404 });
+    if (previous && previous.stock !== update.stock) {
+      await StockMovement.create({
+        productId: id, productName: previous.name, type: update.stock > previous.stock ? "restock" : "adjustment",
+        quantity: Number(update.stock) - previous.stock, beforeStock: previous.stock, afterStock: Number(update.stock),
+        reference: "admin", note: "Stock changed from admin product management"
+      });
+    }
     return NextResponse.json({ ok: true, product });
   } catch (error) {
     const duplicate = typeof error === "object" && error !== null && "code" in error && error.code === 11000;
