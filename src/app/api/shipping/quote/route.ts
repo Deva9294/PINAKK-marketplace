@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const postalCode = typeof body?.postalCode === "string" ? body.postalCode.trim() : "";
     const subtotal = Number(body?.subtotal);
-    if (!/^\\d{6}$/.test(postalCode) || !Number.isFinite(subtotal) || subtotal < 0) {
+    if (!/^\d{6}$/.test(postalCode) || !Number.isFinite(subtotal) || subtotal < 0) {
       return NextResponse.json({ ok: false, error: "Enter a valid 6-digit PIN code" }, { status: 400 });
     }
     await connectToDatabase();
