@@ -21,6 +21,26 @@ export async function POST(request: NextRequest) {
 
   try {
     const event = JSON.parse(rawBody) as any;
+    const refundEntity = event?.payload?.refund?.entity;
+    if (typeof event.event === "string" && event.event.startsWith("refund.") && refundEntity?.payment_id) {
+      await connectToDatabase();
+      const payment = await Payment.findOne({ razorpayPaymentId: refundEntity.payment_id });
+      if (!payment) return NextResponse.json({ ok: true, ignored: true });
+      const order = await Order.findById(payment.orderId);
+      if (!order) return NextResponse.json({ ok: true, ignored: true });
+      const refundStatus = refundEntity.status === "processed" ? "processed"
+        : refundEntity.status === "failed" ? "failed" : "pending";
+      payment.refundId = refundEntity.id || payment.refundId;
+      payment.refundStatus = refundStatus;
+      payment.refundAmount = Number(refundEntity.amount || payment.refundAmount || 0);
+      await payment.save();
+      if (refundStatus === "processed" && payment.refundAmount >= payment.amount) {
+        order.paymentStatus = "refunded";
+        await order.save();
+      }
+      return NextResponse.json({ ok: true, refundStatus });
+    }
+
     const entity = event?.payload?.payment?.entity;
     if (!entity?.order_id) return NextResponse.json({ ok: true, ignored: true });
     await connectToDatabase();
