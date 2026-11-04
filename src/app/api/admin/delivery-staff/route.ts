@@ -40,13 +40,13 @@ export async function POST(request: NextRequest) {
   }
 
   const name = typeof body?.name === "string" ? body.name.trim() : "";
-  const phone = typeof body?.phone === "string" ? body.phone.replace(/[\\s-]/g, "") : "";
+  const phone = typeof body?.phone === "string" ? body.phone.replace(/[\s-]/g, "") : "";
   const password = typeof body?.password === "string" ? body.password : "";
 
   if (
     name.length < 2 ||
     name.length > 100 ||
-    !/^(?:\\+91)?[6-9]\\d{9}$/.test(phone) ||
+    !/^(?:\+91)?[6-9]\d{9}$/.test(phone) ||
     password.length < 10 ||
     password.length > 128
   ) {
@@ -91,7 +91,6 @@ export async function POST(request: NextRequest) {
       message?: string;
     };
 
-    // Keep credentials and personal data out of logs; record only diagnostic metadata.
     console.error("Admin delivery account creation failed:", {
       name: dbError?.name,
       code: dbError?.code,
