@@ -7,6 +7,7 @@ import Product from "@/models/Product";
 import Order from "@/models/Order";
 import User from "@/models/User";
 import Coupon from "@/models/Coupon";
+import ShippingSettings from "@/models/ShippingSettings";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -122,6 +123,25 @@ export async function POST(request: NextRequest) {
       }
       reservedCouponId = String(coupon._id);
     }
+    let deliveryFee = 0;
+    if (method === "delivery") {
+      const settings = await ShippingSettings.findOne({ key: "default" }).lean();
+      const postalCode = body.address.postalCode;
+      const matchingZone = settings?.zones?.find((z: any) => z.pincodes.includes(postalCode));
+      if (matchingZone && !matchingZone.active) {
+        await releaseStock();
+        if (reservedCouponId) { await Coupon.updateOne({ _id: reservedCouponId }, { $inc: { usedCount: -1 } }); reservedCouponId = null; }
+        return NextResponse.json({ ok: false, error: "Home delivery is currently unavailable for this PIN code" }, { status: 400 });
+      }
+      if (!matchingZone && settings?.defaultEnabled === false) {
+        await releaseStock();
+        if (reservedCouponId) { await Coupon.updateOne({ _id: reservedCouponId }, { $inc: { usedCount: -1 } }); reservedCouponId = null; }
+        return NextResponse.json({ ok: false, error: "We do not deliver to this PIN code yet. Please choose store pickup." }, { status: 400 });
+      }
+      const fee = matchingZone ? matchingZone.fee : (settings?.defaultFee ?? 0);
+      const freeAbove = matchingZone ? matchingZone.freeAbove : (settings?.defaultFreeAbove ?? 0);
+      deliveryFee = freeAbove > 0 && subtotal - discount >= freeAbove ? 0 : fee;
+    }
     const order = await Order.create({
       orderNumber: "PK" + Date.now().toString(36).toUpperCase() + randomBytes(3).toString("hex").toUpperCase(),
       ...(session ? { customerUserId: session.id } : {}),
@@ -131,13 +151,13 @@ export async function POST(request: NextRequest) {
         line1: body.address.line1.trim(), line2: typeof body.address.line2 === "string" ? body.address.line2.trim() : "",
         city: body.address.city.trim(), state: body.address.state.trim(), postalCode: body.address.postalCode,
       } } : {}),
-      items: orderItems, subtotal, deliveryFee: 0, couponCode, discount, total: Math.max(0, subtotal - discount),
+      items: orderItems, subtotal, deliveryFee, couponCode, discount, total: Math.max(0, subtotal - discount) + deliveryFee,
       paymentMethod: method === "delivery" ? "cash-on-delivery" : "pay-at-store",
       customerNote: typeof body.customerNote === "string" ? body.customerNote.slice(0, 500) : "",
     });
     reserved.length = 0; // Stock is now committed to the saved order.
     reservedCouponId = null; // Coupon usage is committed with the saved order.
-    return NextResponse.json({ ok: true, order: { orderNumber: order.orderNumber, status: order.status, paymentStatus: order.paymentStatus, subtotal: order.subtotal, total: order.total, createdAt: order.createdAt } }, { status: 201 });
+    return NextResponse.json({ ok: true, order: { orderNumber: order.orderNumber, status: order.status, paymentStatus: order.paymentStatus, subtotal: order.subtotal, deliveryFee: order.deliveryFee, discount: order.discount, total: order.total, createdAt: order.createdAt } }, { status: 201 });
   } catch (error) {
     try { await releaseStock(); } catch (rollbackError) { console.error("Order stock rollback failed:", rollbackError); }
     if (reservedCouponId) { try { await Coupon.updateOne({ _id: reservedCouponId }, { $inc: { usedCount: -1 } }); } catch (rollbackError) { console.error("Coupon usage rollback failed:", rollbackError); } }
