@@ -7,15 +7,15 @@ import Order from "@/models/Order";
 import InvoiceSettings from "@/models/InvoiceSettings";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
-const clean=(v:unknown)=>String(v??"").normalize("NFKD").replace(/[^\\x20-\\x7E]/g," ").replace(/[()\\\\]/g,"\\\\$&").slice(0,180);
+const clean=(v:unknown)=>String(v??"").normalize("NFKD").replace(/[^\x20-\x7E]/g," ").replace(/[()\\]/g,"\\$&").slice(0,180);
 function makePdf(lines:string[]){
  const commands=["BT","/F1 9 Tf","48 790 Td","14 TL"];
  lines.slice(0,50).forEach((line,i)=>{if(i)commands.push("T*");commands.push("("+clean(line)+") Tj")});
- commands.push("ET");const stream=commands.join("\\n");
- const objects=["<< /Type /Catalog /Pages 2 0 R >>","<< /Type /Pages /Kids [3 0 R] /Count 1 >>","<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>","<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>","<< /Length "+Buffer.byteLength(stream)+" >>\\nstream\\n"+stream+"\\nendstream"];
- let pdf="%PDF-1.4\\n";const offsets=[0];for(let i=0;i<objects.length;i++){offsets.push(Buffer.byteLength(pdf));pdf+=(i+1)+" 0 obj\\n"+objects[i]+"\\nendobj\\n"}
- const xref=Buffer.byteLength(pdf);pdf+="xref\\n0 "+(objects.length+1)+"\\n0000000000 65535 f \\n";for(let i=1;i<offsets.length;i++)pdf+=String(offsets[i]).padStart(10,"0")+" 00000 n \\n";
- pdf+="trailer\\n<< /Size "+(objects.length+1)+" /Root 1 0 R >>\\nstartxref\\n"+xref+"\\n%%EOF";return Buffer.from(pdf,"binary");
+ commands.push("ET");const stream=commands.join("\n");
+ const objects=["<< /Type /Catalog /Pages 2 0 R >>","<< /Type /Pages /Kids [3 0 R] /Count 1 >>","<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>","<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>","<< /Length "+Buffer.byteLength(stream)+" >>\nstream\n"+stream+"\nendstream"];
+ let pdf="%PDF-1.4\n";const offsets=[0];for(let i=0;i<objects.length;i++){offsets.push(Buffer.byteLength(pdf));pdf+=(i+1)+" 0 obj\n"+objects[i]+"\nendobj\n"}
+ const xref=Buffer.byteLength(pdf);pdf+="xref\n0 "+(objects.length+1)+"\n0000000000 65535 f \n";for(let i=1;i<offsets.length;i++)pdf+=String(offsets[i]).padStart(10,"0")+" 00000 n \n";
+ pdf+="trailer\n<< /Size "+(objects.length+1)+" /Root 1 0 R >>\nstartxref\n"+xref+"\n%%EOF";return Buffer.from(pdf,"binary");
 }
 export async function GET(request:NextRequest,context:{params:Promise<{id:string}>}){
  const session=await readUserSession(request);const admin=await isAdminRequest(request);
