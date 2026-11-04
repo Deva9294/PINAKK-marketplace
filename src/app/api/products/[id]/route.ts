@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest, context: Context) {
     if (!product) return NextResponse.json({ ok: false, error: "Product not found" }, { status: 404 });
     if (previous && previous.stock !== update.stock) {
       await StockMovement.create({
-        productId: id, productName: previous.name, type: update.stock > previous.stock ? "restock" : "adjustment",
+        productId: id, productName: previous.name, type: Number(update.stock) > previous.stock ? "restock" : "adjustment",
         quantity: Number(update.stock) - previous.stock, beforeStock: previous.stock, afterStock: Number(update.stock),
         reference: "admin", note: "Stock changed from admin product management"
       });
