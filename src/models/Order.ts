@@ -5,7 +5,7 @@ const OrderItemSchema = new Schema({
   name: { type: String, required: true, trim: true, maxlength: 160 },
   image: { type: String, default: "", maxlength: 2000 },
   unitPrice: { type: Number, required: true, min: 0 },
-  gstRate: { type: Number, default: 0, min: 0, max: 100 },
+  gstRate: { type: Number, min: 0, max: 100 },
   hsnCode: { type: String, trim: true, maxlength: 8, default: "" },
   quantity: { type: Number, required: true, min: 1, max: 20 },
 }, { _id: false });
