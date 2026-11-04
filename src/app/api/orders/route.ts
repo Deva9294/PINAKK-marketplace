@@ -9,6 +9,7 @@ import User from "@/models/User";
 import Coupon from "@/models/Coupon";
 import ShippingSettings from "@/models/ShippingSettings";
 import InvoiceSettings from "@/models/InvoiceSettings";
+import StockMovement from "@/models/StockMovement";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -81,15 +82,21 @@ export async function POST(request: NextRequest) {
     // Atomically reserve stock to prevent simultaneous orders overselling the same item.
     for (const id of ids) {
       const quantity = quantities.get(id)!;
-      const result = await Product.updateOne(
+      const before = await Product.findOneAndUpdate(
         { _id: id, active: true, stock: { $gte: quantity } },
-        { $inc: { stock: -quantity } }
-      );
-      if (result.modifiedCount !== 1) {
+        { $inc: { stock: -quantity } },
+        { new: false, projection: { name: 1, stock: 1 } }
+      ).lean();
+      if (!before) {
         await releaseStock();
         return NextResponse.json({ ok: false, error: "Insufficient stock for " + (products.find(p => String(p._id) === id)?.name || "one item") + ". Refresh your cart." }, { status: 409 });
       }
       reserved.push({ id, quantity });
+      await StockMovement.create({
+        productId: id, productName: before.name, type: "sale", quantity: -quantity,
+        beforeStock: before.stock, afterStock: before.stock - quantity,
+        reference: "checkout", note: "Stock reserved for customer order"
+      });
     }
 
     const orderItems = products.map(p => {
