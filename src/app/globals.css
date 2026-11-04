@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* PINAKK — original editorial storefront design */
 .pinakk-store{--pk-blue:#1e40af;--pk-orange:#ff7a00;--pk-ink:#172033;--pk-muted:#697386;--pk-paper:#f8fafc;--pk-line:#e8edf4;min-height:100vh;background:var(--pk-paper);color:var(--pk-ink);font-family:Inter,Arial,Helvetica,sans-serif;padding-bottom:0}
 .pinakk-store *{box-sizing:border-box}.pinakk-store a{color:inherit;text-decoration:none}.pinakk-store button,.pinakk-store input{font:inherit}
