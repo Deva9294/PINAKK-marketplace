@@ -5,10 +5,22 @@ import { notFound } from "next/navigation";
 import { catalogueCategories } from "@/lib/catalogue";
 import { connectToDatabase } from "@/lib/mongodb";
 import Product from "@/models/Product";
+import Category from "@/models/Category";
 import CourseFinder from "@/components/CourseFinder";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pinakk-marketplace.onrender.com";
 type Props = { params: Promise<{ slug: string }> };
+
+async function getCategory(slug: string) {
+  try {
+    await connectToDatabase();
+    const stored = await Category.findOne({ slug, active: true }).lean();
+    if (stored) return stored;
+  } catch {
+    // Use the checked-in catalogue defaults if the database is temporarily unavailable.
+  }
+  return catalogueCategories.find(item => item.slug === slug && item.active) || null;
+}
 
 export function generateStaticParams() {
   return catalogueCategories.map(category => ({ slug: category.slug }));
@@ -16,7 +28,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const category = catalogueCategories.find(item => item.slug === slug);
+  const category = await getCategory(slug);
   if (!category) return { title: "Category not found", robots: { index: false, follow: true } };
   return {
     title: category.seoTitle,
@@ -28,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const category = catalogueCategories.find(item => item.slug === slug);
+  const category = await getCategory(slug);
   if (!category || !category.active) notFound();
 
   let products: any[] = [];
