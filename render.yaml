@@ -22,3 +22,12 @@ services:
         sync: false
       - key: AUTH_SECRET
         generateValue: true
+      # Optional: configure all four values to enable Razorpay checkout and webhooks.
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_RAZORPAY_KEY_ID
+        sync: false
