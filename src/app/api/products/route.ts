@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
         { name: { $regex: escaped, $options: "i" } },
         { brand: { $regex: escaped, $options: "i" } },
         { category: { $regex: escaped, $options: "i" } },
+        { subcategory: { $regex: escaped, $options: "i" } },
         { tags: { $regex: escaped, $options: "i" } },
       ];
     }
