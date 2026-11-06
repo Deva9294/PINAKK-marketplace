@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
 import Product from "@/models/Product";
-import { products as demoProducts } from "@/lib/products";
+import { catalogueCategories } from "@/lib/catalogue";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pinakk-marketplace.onrender.com";
 
@@ -10,11 +10,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const entries: MetadataRoute.Sitemap = [
     { url: siteUrl, lastModified: now, changeFrequency: "daily", priority: 1 },
-    ...demoProducts.map(product => ({
-      url: siteUrl + "/product/" + product.id,
+    ...catalogueCategories.filter(category => category.active).map(category => ({
+      url: siteUrl + "/category/" + category.slug,
       lastModified: now,
       changeFrequency: "weekly" as const,
-      priority: 0.7
+      priority: 0.85
     }))
   ];
   try {
