@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const session = await readUserSession(request);
+  if (process.env.PINAKK_ONLINE_PAYMENTS_ENABLED !== "true") {\n    return NextResponse.json({ ok: false, error: "Online payments are disabled. Choose COD or pay at store." }, { status: 403 });\n  }\n  const session = await readUserSession(request);
   if (!session || session.role !== "customer") {
     return NextResponse.json({ ok: false, error: "Please sign in before paying online" }, { status: 401 });
   }
