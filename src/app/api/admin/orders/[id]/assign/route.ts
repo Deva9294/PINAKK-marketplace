@@ -47,7 +47,7 @@ export async function PATCH(
     if (!deliveryBoyId) {
       order.deliveryBoyId = null;
     } else {
-      const staff = await User.findOne({ _id: deliveryBoyId, role: "delivery", active: true }).select("_id").lean();
+      const staff: any = await User.findOne({ _id: deliveryBoyId, role: "delivery", active: true }).select("_id").lean();
       if (!staff) return NextResponse.json({ ok: false, error: "Active delivery account not found" }, { status: 404 });
       order.deliveryBoyId = staff._id;
     }
