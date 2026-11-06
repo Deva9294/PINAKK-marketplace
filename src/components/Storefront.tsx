@@ -10,6 +10,7 @@ import {
   Store, X, Sparkles, ArrowRight, Mail
 } from "lucide-react";
 import { products as demoProducts, categories, Product } from "@/lib/products";
+import { catalogueCategories, categoryNames } from "@/lib/catalogue";
 
 type CartItem = { id: string; qty: number };
 
@@ -43,16 +44,14 @@ const slides = [
   }
 ];
 
-const categoryTiles = [
-  { title: "Stationery", sub: "Write, plan & create", filter: "Stationery", image: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=500&q=80", icon: Pencil },
-  { title: "Books & Courses", sub: "Learning for every class", filter: "Books", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=500&q=80", icon: BookOpen },
-  { title: "Paper & Printing", sub: "Paper for every project", filter: "Paper", image: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=500&q=80", icon: PackageCheck },
-  { title: "School Bags", sub: "Ready for the day", filter: "Bags", image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=80", icon: Briefcase },
-  { title: "Perfumes & Belts", sub: "Everyday accessories", filter: "Accessories", image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=500&q=80", icon: Gift },
-  { title: "Tarpaulin & Net", sub: "Outdoor utility range", filter: "Tarpaulin", image: "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?auto=format&fit=crop&w=500&q=80", icon: Home },
-  { title: "General Items", sub: "Handy daily essentials", filter: "General", image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=500&q=80", icon: Store },
-  { title: "New Arrivals", sub: "Fresh finds to explore", filter: "All", image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=500&q=80", icon: Sparkles }
-];
+const categoryIcons = [Pencil, BookOpen, PackageCheck, Store, Gift, Briefcase, Grid3X3, Home];
+const categoryTiles = catalogueCategories.map((item, index) => ({
+  title: item.name,
+  sub: item.description,
+  filter: item.name,
+  image: item.image,
+  icon: categoryIcons[index] || PackageCheck
+}));
 
 function Brand() {
   return (
@@ -87,7 +86,7 @@ export default function Storefront() {
           setCatalogue(data.products.map((p: any) => ({
             id: String(p._id), name: p.name, category: p.category, price: p.price,
             oldPrice: p.compareAtPrice, description: p.description,
-            image: p.image || "/placeholder-product.png", stock: p.stock, badge: undefined
+            image: p.image || "/placeholder-product.png", stock: p.stock, subcategory: p.subcategory || "", badge: undefined
           })));
           setCatalogueSource("database");
         }
@@ -104,15 +103,15 @@ export default function Storefront() {
 
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
   const availableCategories = useMemo(
-    () => Array.from(new Set(["All", ...categories.filter(c => c !== "All"), ...catalogue.map(p => p.category)])),
+    () => ["All", ...categoryNames],
     [catalogue]
   );
   const filtered = useMemo(
     () => catalogue.filter(p =>
-      (category === "All" || p.category.toLowerCase().includes(category.toLowerCase())) &&
+      (category === "All" || p.category === category) &&
       (p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.category.toLowerCase().includes(query.toLowerCase()) ||
-        (p.description || "").toLowerCase().includes(query.toLowerCase()))
+        (p.description || "").toLowerCase().includes(query.toLowerCase()) || (p.subcategory || "").toLowerCase().includes(query.toLowerCase()))
     ),
     [query, category, catalogue]
   );
@@ -142,6 +141,7 @@ export default function Storefront() {
   }
 
   const active = slides[slide];
+  const activeCategory = catalogueCategories.find(item => item.name === category);
 
   return (
     <main className="pinakk-store">
@@ -183,9 +183,7 @@ export default function Storefront() {
       <nav className={mobileMenu ? "pk-navigation is-open" : "pk-navigation"} aria-label="Main navigation">
         <div className="pk-nav-inner">
           <button onClick={() => chooseCategory("All")}><Grid3X3 size={15} /> Explore all</button>
-          {["Stationery", "Books", "Paper", "General", "Accessories", "Bags", "Tarpaulin"].map(item =>
-            <button key={item} onClick={() => chooseCategory(item)}>{item}</button>
-          )}
+          {categoryNames.map(item => <button key={item} onClick={() => chooseCategory(item)}>{item}</button>)}
           <button className="pk-offers-link" onClick={() => chooseCategory("All")}><Tag size={14} /> Just arrived</button>
         </div>
       </nav>
@@ -228,6 +226,20 @@ export default function Storefront() {
             </button>;
           })}
         </div>
+        {activeCategory && (
+          <div className="pk-subcategory-panel">
+            <div className="pk-subcategory-heading"><b>Browse {activeCategory.name}</b><span>{activeCategory.subcategories.length} subcategories</span></div>
+            <div className="pk-subcategory-list">
+              {activeCategory.subcategories.map(item => (
+                <button key={item} onClick={() => { setQuery(item); document.getElementById("pk-products")?.scrollIntoView({ behavior: "smooth" }); }}>
+                  <span><Image src={activeCategory.image} alt={activeCategory.name + " illustrative catalogue"} fill sizes="64px" /></span>
+                  <b>{item}</b><ArrowUpRight size={14} />
+                </button>
+              ))}
+            </div>
+            <div className="pk-category-filters"><b>Popular filters</b>{activeCategory.filters.map(item => <span key={item}>{item}</span>)}</div>
+          </div>
+        )}
       </section>
 
       <section className="pk-products-section" id="pk-products" aria-labelledby="pk-products-title">
@@ -267,7 +279,7 @@ export default function Storefront() {
       <footer className="pk-footer" id="pk-support">
         <div className="pk-footer-main">
           <div className="pk-footer-about"><Brand /><p>Your everyday destination for stationery, school books, printing paper, bags, tarpaulin, nets and useful lifestyle essentials. Proudly serving Rehti and nearby communities.</p><a href="tel:9685535343"><Phone size={15} /> +91 96855 35343</a><a href="https://wa.me/919685535343" target="_blank" rel="noreferrer"><Mail size={15} /> Message us on WhatsApp</a></div>
-          <div><b>DISCOVER</b><button onClick={() => chooseCategory("All")}>Shop all products</button><button onClick={() => chooseCategory("Stationery")}>Stationery</button><button onClick={() => chooseCategory("Books")}>Books & courses</button><button onClick={() => chooseCategory("Paper")}>Paper & printing</button><button onClick={() => chooseCategory("Bags")}>School bags</button></div>
+          <div><b>DISCOVER</b><button onClick={() => chooseCategory("All")}>Shop all products</button>{categoryNames.map(item => <button key={item} onClick={() => chooseCategory(item)}>{item}</button>)}</div>
           <div><b>WE'RE HERE TO HELP</b><a href="tel:9685535343">Customer support</a><a href="https://wa.me/919685535343" target="_blank" rel="noreferrer">Order assistance on WhatsApp</a><a href="#pk-support">Shipping information</a><a href="#pk-support">Returns & refunds</a></div>
           <div className="pk-footer-note"><b>SHOP WITH CONFIDENCE</b><span><ShieldCheck size={17} /> Secure checkout</span><span><PackageCheck size={17} /> Clear order updates</span><span><Headphones size={17} /> Human support</span><a href="https://wa.me/919685535343" target="_blank" rel="noreferrer"><Phone size={17} /> WhatsApp support</a></div>
         </div>
