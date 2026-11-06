@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { isAdminRequest } from "@/lib/admin-auth";
-import { hashPassword } from "@/lib/user-auth";
+import { hashPassword, phoneLookupValues } from "@/lib/user-auth";
 import User from "@/models/User";
 
 export const runtime = "nodejs";
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
 
-    const existing = await User.findOne({ phone }).select("_id").lean();
+    const existing = await User.findOne({ phone: { $in: phoneLookupValues(phone) } }).select("_id").lean();
     if (existing) {
       return NextResponse.json(
         { ok: false, error: "This mobile number is already registered. Use a different number." },
