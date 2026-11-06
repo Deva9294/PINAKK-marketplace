@@ -16,12 +16,14 @@ export async function PATCH(request: NextRequest, context: Context) {
   if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ ok: false, error: "Invalid category id" }, { status: 400 });
   let body: Record<string, unknown>;
   try { body = await request.json(); } catch { return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 }); }
-  const allowed = ["name","slug","description","image","icon","subcategories","seoTitle","seoDescription","active","displayOrder"];
+  const allowed = ["name","slug","description","image","icon","subcategories","items","filters","courseOptions","customPricing","seoTitle","seoDescription","active","displayOrder"];
   const update = Object.fromEntries(Object.entries(body).filter(([key]) => allowed.includes(key)));
   if (!Object.keys(update).length) return NextResponse.json({ ok: false, error: "No supported fields supplied" }, { status: 400 });
   if (update.name !== undefined && (typeof update.name !== "string" || !update.name.trim() || update.name.length > 80)) return NextResponse.json({ ok: false, error: "Invalid category name" }, { status: 400 });
   if (update.slug !== undefined && (typeof update.slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(update.slug))) return NextResponse.json({ ok: false, error: "Invalid category slug" }, { status: 400 });
   if (update.subcategories !== undefined && (!Array.isArray(update.subcategories) || update.subcategories.length > 100 || !update.subcategories.every(x => typeof x === "string" && x.length <= 100))) return NextResponse.json({ ok: false, error: "Invalid subcategories" }, { status: 400 });
+  if (update.items !== undefined && (!Array.isArray(update.items) || update.items.length > 200 || !update.items.every(x => typeof x === "string" && x.length <= 120))) return NextResponse.json({ ok: false, error: "Invalid category items" }, { status: 400 });
+  if (update.filters !== undefined && (!Array.isArray(update.filters) || update.filters.length > 50 || !update.filters.every(x => typeof x === "string" && x.length <= 120))) return NextResponse.json({ ok: false, error: "Invalid category filters" }, { status: 400 });
   try {
     await connectToDatabase();
     const category = await Category.findByIdAndUpdate(id, update, { new: true, runValidators: true });
