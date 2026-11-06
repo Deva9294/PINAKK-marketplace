@@ -32,7 +32,12 @@ export const metadata: Metadata = {
   keywords: [
     "PINAKK",
     "buy stationery online",
-    "school books online",\n    "copy and notebook online",\n    "perfume and fragrance online",\n    "belts and fashion accessories",\n    "agriculture shade net",\n    "HDPE tirpal and tarpaulin",
+    "school books online",
+    "copy and notebook online",
+    "perfume and fragrance online",
+    "belts and fashion accessories",
+    "agriculture shade net",
+    "HDPE tirpal and tarpaulin",
     "school course books",
     "Pariksha Bodh books",
     "A4 copy paper",
