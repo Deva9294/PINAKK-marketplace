@@ -20,7 +20,7 @@ const ProductSchema = new Schema({
   active: { type: Boolean, default: true, index: true },
 }, { timestamps: true, versionKey: false });
 
-ProductSchema.index({ active: 1, category: 1, createdAt: -1 });
+ProductSchema.index({ active: 1, category: 1, subcategory: 1, createdAt: -1 });
 ProductSchema.index({ active: 1, price: 1 });
 ProductSchema.index({ active: 1, brand: 1 });
 
