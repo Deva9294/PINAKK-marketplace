@@ -15,7 +15,7 @@ function safeEqualHex(left: string, right: string) {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {\n  if (process.env.PINAKK_ONLINE_PAYMENTS_ENABLED !== "true") {\n    return NextResponse.json({ ok: false, error: "Online payments are disabled. Choose COD or pay at store." }, { status: 403 });\n  }
   const session = await readUserSession(request);
   if (!session || session.role !== "customer") return NextResponse.json({ ok: false, error: "Customer sign-in required" }, { status: 401 });
   const keyId = process.env.RAZORPAY_KEY_ID;
