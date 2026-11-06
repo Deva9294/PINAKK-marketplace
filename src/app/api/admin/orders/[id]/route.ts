@@ -33,9 +33,10 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   let failure: "not_found" | "transition" | null = null;
   try {
     await connectToDatabase();
-    dbSession = await mongoose.startSession();
-    await dbSession.withTransaction(async () => {
-      const order = await Order.findById(id).session(dbSession);
+    const session = await mongoose.startSession();
+    dbSession = session;
+    await session.withTransaction(async () => {
+      const order = await Order.findById(id).session(session);
       if (!order) { failure = "not_found"; return; }
       if (!transitions[order.status]?.includes(body.status)) { failure = "transition"; return; }
 
@@ -46,7 +47,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
           const product = await Product.findOneAndUpdate(
             { _id: item.productId },
             { $inc: { stock: item.quantity } },
-            { new: false, session: dbSession, projection: { name: 1, stock: 1 } }
+            { new: false, session, projection: { name: 1, stock: 1 } }
           ).lean();
           if (!product) throw new Error("A cancelled order references a missing product");
           await StockMovement.create([{
@@ -63,7 +64,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       }
 
       order.status = body.status;
-      await order.save({ session: dbSession });
+      await order.save({ session });
       result = { id: order.id, orderNumber: order.orderNumber, status: order.status, updatedAt: order.updatedAt };
     });
     if (failure === "not_found") return NextResponse.json({ ok: false, error: "Order not found" }, { status: 404 });
