@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
-import { readUserSession } from "@/lib/user-auth";
+import { readUserSession, phoneLookupValues } from "@/lib/user-auth";
 import Order from "@/models/Order";
 import User from "@/models/User";
 
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     if (!user) return NextResponse.json({ ok: false, error: "Account not found" }, { status: 404 });
 
     const orders = await Order.find({
-      $or: [{ customerUserId: session.id }, { "customer.phone": user.phone, customerUserId: null }]
+      $or: [{ customerUserId: session.id }, { "customer.phone": { $in: phoneLookupValues(user.phone) }, customerUserId: null }]
     }).sort({ createdAt: -1 }).limit(50).lean();
 
     return NextResponse.json({ ok: true, orders });
