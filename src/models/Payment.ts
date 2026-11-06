@@ -11,6 +11,9 @@ const PaymentSchema = new Schema({
   amount: { type: Number, required: true, min: 1 },
   currency: { type: String, enum: ["INR"], default: "INR" },
   status: { type: String, enum: ["created", "paid", "failed"], default: "created", index: true },
+  refundId: { type: String, default: "", index: true },
+  refundStatus: { type: String, enum: ["none", "requested", "pending", "processed", "failed"], default: "none", index: true },
+  refundAmount: { type: Number, default: 0, min: 0 },
 }, { timestamps: true, versionKey: false });
 
 const Payment = (mongoose.models.Payment as Model<any>) || mongoose.model("Payment", PaymentSchema);

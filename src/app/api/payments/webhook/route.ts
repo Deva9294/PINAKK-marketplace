@@ -21,6 +21,32 @@ export async function POST(request: NextRequest) {
 
   try {
     const event = JSON.parse(rawBody) as any;
+    const refundEntity = event?.payload?.refund?.entity;
+    if (typeof event.event === "string" && event.event.startsWith("refund.") && refundEntity?.payment_id) {
+      await connectToDatabase();
+      const payment = await Payment.findOne({ razorpayPaymentId: refundEntity.payment_id });
+      if (!payment) return NextResponse.json({ ok: true, ignored: true });
+      const refundStatus = refundEntity.status === "processed" ? "processed"
+        : refundEntity.status === "failed" ? "failed" : "pending";
+      const updateFilter = refundStatus === "processed"
+        ? { _id: payment._id }
+        : refundStatus === "failed"
+          ? { _id: payment._id, refundStatus: { $ne: "processed" } }
+          : { _id: payment._id, refundStatus: { $nin: ["processed", "failed"] } };
+      await Payment.updateOne(updateFilter, {
+        $set: {
+          refundId: refundEntity.id || payment.refundId,
+          refundStatus,
+          refundAmount: Number(refundEntity.amount || payment.refundAmount || 0),
+        },
+      });
+      const currentPayment = await Payment.findById(payment._id);
+      if (currentPayment?.refundStatus === "processed" && currentPayment.refundAmount >= currentPayment.amount) {
+        await Order.updateOne({ _id: currentPayment.orderId, paymentStatus: "paid" }, { $set: { paymentStatus: "refunded" } });
+      }
+      return NextResponse.json({ ok: true, refundStatus: currentPayment?.refundStatus || refundStatus });
+    }
+
     const entity = event?.payload?.payment?.entity;
     if (!entity?.order_id) return NextResponse.json({ ok: true, ignored: true });
     await connectToDatabase();
@@ -39,7 +65,14 @@ export async function POST(request: NextRequest) {
         payment.razorpayPaymentId = entity.id || payment.razorpayPaymentId;
         await payment.save();
       }
-      if (order.paymentStatus !== "paid") {
+      if (order.status === "cancelled") {
+        // A late capture can arrive after an unpaid order was cancelled and stock restored.
+        // Keep the order cancelled, record the captured payment, and flag it for an admin refund.
+        order.paymentStatus = "paid";
+        order.paymentMethod = "razorpay";
+        await order.save();
+        console.error("Captured Razorpay payment received for cancelled order; refund review required:", order.orderNumber, entity.id || "");
+      } else if (order.paymentStatus !== "paid") {
         order.paymentStatus = "paid";
         order.paymentMethod = "razorpay";
         if (order.status === "pending") order.status = "confirmed";
