@@ -9,6 +9,7 @@ import Category from "@/models/Category";
 import CourseFinder from "@/components/CourseFinder";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pinakk-marketplace.onrender.com";
+export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ slug: string }> };
 
 async function getCategory(slug: string) {
@@ -22,9 +23,6 @@ async function getCategory(slug: string) {
   return catalogueCategories.find(item => item.slug === slug && item.active) || null;
 }
 
-export function generateStaticParams() {
-  return catalogueCategories.map(category => ({ slug: category.slug }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
