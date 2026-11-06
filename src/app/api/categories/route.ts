@@ -16,6 +16,8 @@ function validCategory(value: unknown) {
     (v.image === undefined || (typeof v.image === "string" && v.image.length <= 2000)) &&
     (v.icon === undefined || (typeof v.icon === "string" && v.icon.length <= 60)) &&
     (v.subcategories === undefined || (Array.isArray(v.subcategories) && v.subcategories.length <= 100 && v.subcategories.every(x => typeof x === "string" && x.length <= 100))) &&
+    (v.items === undefined || (Array.isArray(v.items) && v.items.length <= 200 && v.items.every(x => typeof x === "string" && x.length <= 120))) &&
+    (v.filters === undefined || (Array.isArray(v.filters) && v.filters.length <= 50 && v.filters.every(x => typeof x === "string" && x.length <= 120))) &&
     (v.seoTitle === undefined || (typeof v.seoTitle === "string" && v.seoTitle.length <= 180)) &&
     (v.seoDescription === undefined || (typeof v.seoDescription === "string" && v.seoDescription.length <= 320)) &&
     (v.active === undefined || typeof v.active === "boolean") &&
