@@ -46,7 +46,7 @@ export default async function CategoryPage({ params }: Props) {
     name: category.name,
     description: category.seoDescription,
     url: siteUrl + "/category/" + category.slug,
-    mainEntity: { "@type": "ItemList", numberOfItems: products.length, itemListElement: products.map((p, i) => ({ "@type": "ListItem", position: i + 1, url: siteUrl + "/product/" + String(p.slug || p._id), name: p.name })) }
+    mainEntity: { "@type": "ItemList", numberOfItems: products.length, itemListElement: products.map((p, i) => ({ "@type": "ListItem", position: i + 1, url: siteUrl + "/product/" + String(p._id), name: p.name })) }
   };
 
   return (
