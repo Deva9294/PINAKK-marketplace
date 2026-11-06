@@ -30,6 +30,15 @@ function validProduct(value: unknown): value is Record<string, unknown> {
     (p.brand === undefined || (typeof p.brand === "string" && p.brand.length <= 100)) &&
     (p.subcategory === undefined || (typeof p.subcategory === "string" && p.subcategory.length <= 100)) &&
     validTextArray(p.images, 12, 2000) && validTextArray(p.tags, 30, 60) && validSpecs(p.specifications) &&
+    (p.variants === undefined || (Array.isArray(p.variants) && p.variants.length <= 100 && p.variants.every(v => !!v && typeof v === "object" && typeof (v as any).stock === "number" && Number.isInteger((v as any).stock) && (v as any).stock >= 0 && typeof (v as any).price === "number" && Number.isFinite((v as any).price) && (v as any).price >= 0))) &&
+    (p.barcode === undefined || (typeof p.barcode === "string" && p.barcode.length <= 100)) &&
+    (p.weight === undefined || (typeof p.weight === "number" && Number.isFinite(p.weight) && p.weight >= 0)) &&
+    (p.gsm === undefined || (typeof p.gsm === "number" && Number.isFinite(p.gsm) && p.gsm >= 0)) &&
+    (p.lowStockThreshold === undefined || (typeof p.lowStockThreshold === "number" && Number.isInteger(p.lowStockThreshold) && p.lowStockThreshold >= 0)) &&
+    (p.customDimensions === undefined || (!!p.customDimensions && typeof p.customDimensions === "object" && typeof (p.customDimensions as any).enabled === "boolean" && ["sq ft","sq m"].includes((p.customDimensions as any).unit) && typeof (p.customDimensions as any).pricePerUnit === "number" && (p.customDimensions as any).pricePerUnit >= 0)) &&
+    (p.schoolCourse === undefined || (!!p.schoolCourse && typeof p.schoolCourse === "object" && Object.values(p.schoolCourse as Record<string, unknown>).every(v => typeof v === "string" || typeof v === "boolean"))) &&
+    (p.seoTitle === undefined || (typeof p.seoTitle === "string" && p.seoTitle.length <= 180)) &&
+    (p.seoDescription === undefined || (typeof p.seoDescription === "string" && p.seoDescription.length <= 320)) &&
     (p.active === undefined || typeof p.active === "boolean");
 }
 
