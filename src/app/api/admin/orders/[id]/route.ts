@@ -28,11 +28,12 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   try { body = await request.json(); } catch { return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 }); }
   if (!body || !allowed.includes(body.status)) return NextResponse.json({ ok: false, error: "Invalid order status" }, { status: 400 });
 
-  const dbSession = await mongoose.startSession();
+  let dbSession: mongoose.ClientSession | null = null;
   let result: any = null;
   let failure: "not_found" | "transition" | null = null;
   try {
     await connectToDatabase();
+    dbSession = await mongoose.startSession();
     await dbSession.withTransaction(async () => {
       const order = await Order.findById(id).session(dbSession);
       if (!order) { failure = "not_found"; return; }
@@ -73,6 +74,6 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     console.error("PATCH /api/admin/orders failed:", error);
     return NextResponse.json({ ok: false, error: "Could not update order. Verify MongoDB transaction support and server logs." }, { status: 503 });
   } finally {
-    await dbSession.endSession();
+    if (dbSession) await dbSession.endSession();
   }
 }
