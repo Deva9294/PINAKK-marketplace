@@ -5,27 +5,70 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { products as demoProducts, type Product } from "@/lib/products";
 
+type CartItem = { id: string; qty: number };
+
 export default function CartPage() {
   const [catalogue, setCatalogue] = useState<Product[]>(demoProducts);
-  const [cart, setCart] = useState<{ id: string; qty: number }[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+  const [catalogueReady, setCatalogueReady] = useState(false);
+
   useEffect(() => {
-    try { setCart(JSON.parse(localStorage.getItem("pinakk-cart") || "[]")); } catch { setCart([]); }
-    fetch("/api/products").then(r => r.ok ? r.json() : Promise.reject())
+    try {
+      const saved = JSON.parse(localStorage.getItem("pinakk-cart") || "[]");
+      setCart(Array.isArray(saved) ? saved.filter((item: any) =>
+        item && typeof item.id === "string" && Number.isInteger(item.qty) && item.qty > 0
+      ) : []);
+    } catch {
+      setCart([]);
+      localStorage.removeItem("pinakk-cart");
+    }
+    setHydrated(true);
+
+    fetch("/api/products")
+      .then(response => response.ok ? response.json() : Promise.reject())
       .then(data => {
-        if (Array.isArray(data.products) && data.products.length) {
-          setCatalogue(data.products.map((p: any) => ({
-            id: String(p._id), name: p.name, category: p.category, price: p.price,
-            oldPrice: p.compareAtPrice, description: p.description, image: p.image || "", stock: p.stock
+        if (Array.isArray(data.products)) {
+          setCatalogue(data.products.map((product: any) => ({
+            id: String(product._id),
+            name: product.name,
+            category: product.category,
+            price: product.price,
+            oldPrice: product.compareAtPrice,
+            description: product.description,
+            image: product.image || "",
+            stock: product.stock
           })));
         }
-      }).catch(() => {});
+      })
+      .catch(() => {})
+      .finally(() => setCatalogueReady(true));
   }, []);
-  useEffect(() => { localStorage.setItem("pinakk-cart", JSON.stringify(cart)); }, [cart]);
-  const items = useMemo(() => cart.map(c => ({ ...c, product: catalogue.find(p => p.id === c.id) })).filter(x => x.product), [cart, catalogue]);
-  const total = items.reduce((sum, x) => sum + (x.product?.price || 0) * x.qty, 0);
+
+  useEffect(() => {
+    if (hydrated) localStorage.setItem("pinakk-cart", JSON.stringify(cart));
+  }, [cart, hydrated]);
+
+  const items = useMemo(
+    () => cart.map(item => ({ ...item, product: catalogue.find(product => product.id === item.id) }))
+      .filter(item => item.product),
+    [cart, catalogue]
+  );
+  const total = items.reduce((sum, item) => sum + (item.product?.price || 0) * item.qty, 0);
+
   function update(id: string, delta: number) {
-    setCart(old => old.map(x => x.id === id ? { ...x, qty: Math.max(0, Math.min(20, x.qty + delta)) } : x).filter(x => x.qty > 0));
+    const product = catalogue.find(item => item.id === id);
+    const max = Math.min(20, Math.max(0, product?.stock ?? 20));
+    setCart(old => old.map(item => item.id === id
+      ? { ...item, qty: Math.max(0, Math.min(max, item.qty + delta)) }
+      : item
+    ).filter(item => item.qty > 0));
   }
+
+  if (!hydrated) {
+    return <main className="cart-page"><div className="cart-wrap"><p>Loading your shopping bag…</p></div></main>;
+  }
+
   return <main className="cart-page">
     <Link href="/" className="brand"><span className="brand-mark">P</span><span><b>PINAKK</b><small>EVERYDAY, MADE EASIER</small></span></Link>
     <div className="cart-wrap">
@@ -33,14 +76,15 @@ export default function CartPage() {
       <h1 className="cart-title">Your shopping bag</h1>
       {items.length === 0 ? <div className="cart-empty"><ShoppingBag size={38}/><h2>Your bag is waiting</h2><p>Find something useful for your everyday.</p><Link className="primary-btn" href="/">Explore products</Link></div> :
       <div className="cart-layout">
-        <div className="cart-items">{items.map(x => <div className="cart-row" key={x.id}>
-          <div className="cart-thumb" style={{ backgroundImage: "url(" + x.product?.image + ")" }}/>
-          <div className="cart-desc"><small>{x.product?.category}</small><b>{x.product?.name}</b><span>₹{x.product?.price}</span></div>
-          <div className="qty"><button aria-label="Decrease quantity" onClick={() => update(x.id, -1)}><Minus size={14}/></button><b>{x.qty}</b><button aria-label="Increase quantity" onClick={() => update(x.id, 1)}><Plus size={14}/></button></div>
-          <button className="remove" aria-label="Remove item" onClick={() => setCart(old => old.filter(i => i.id !== x.id))}><Trash2 size={16}/></button>
+        <div className="cart-items">{items.map(item => <div className="cart-row" key={item.id}>
+          <div className="cart-thumb" style={{ backgroundImage: "url(" + item.product?.image + ")" }}/>
+          <div className="cart-desc"><small>{item.product?.category}</small><b>{item.product?.name}</b><span>₹{item.product?.price?.toLocaleString("en-IN")}</span>{(item.product?.stock ?? 0) < 1 && <small className="pa-error">Currently out of stock</small>}</div>
+          <div className="qty"><button aria-label="Decrease quantity" onClick={() => update(item.id, -1)}><Minus size={14}/></button><b>{item.qty}</b><button aria-label="Increase quantity" disabled={item.qty >= Math.min(20, item.product?.stock ?? 20)} onClick={() => update(item.id, 1)}><Plus size={14}/></button></div>
+          <button className="remove" aria-label="Remove item" onClick={() => setCart(old => old.filter(current => current.id !== item.id))}><Trash2 size={16}/></button>
         </div>)}</div>
-        <aside className="summary"><h3>Order summary</h3><div><span>Subtotal</span><b>₹{total.toLocaleString("en-IN")}</b></div><div><span>Delivery</span><b>To be confirmed</b></div><hr/><div className="grand"><span>Estimated total</span><b>₹{total.toLocaleString("en-IN")}</b></div><p>Choose store pickup or home delivery at checkout.</p><Link className="primary-btn checkout" href="/checkout">Continue to checkout</Link><small className="secure-note">Pay at store or cash on delivery. Online payment is not enabled yet.</small></aside>
+        <aside className="summary"><h3>Order summary</h3><div><span>Subtotal</span><b>₹{total.toLocaleString("en-IN")}</b></div><div><span>Delivery</span><b>Calculated at checkout</b></div><hr/><div className="grand"><span>Estimated total</span><b>₹{total.toLocaleString("en-IN")}</b></div><p>Choose store pickup or home delivery, then select online payment or cash on delivery at checkout.</p><Link className="primary-btn checkout" href="/checkout">Continue to checkout</Link><small className="secure-note">Secure online payment with Razorpay (when configured), or pay at store / cash on delivery.</small></aside>
       </div>}
+      {!catalogueReady && items.length > 0 && <small>Refreshing product availability…</small>}
     </div>
   </main>;
 }
