@@ -31,10 +31,18 @@ type ProductView = {
 };
 
 function toRecord(value: any): Record<string,string> {
-  if (!value) return {};
-  if (value instanceof Map) return Object.fromEntries(value.entries()).reduce((out, [k,v]) => ({...out,[k]:String(v)}), {} as Record<string,string>);
-  if (typeof value === "object" && !Array.isArray(value)) return Object.fromEntries(Object.entries(value).filter(([,v]) => v !== undefined && v !== null && v !== "").map(([k,v]) => [k,String(v)]));
-  return {};
+  const output: Record<string,string> = {};
+  if (!value) return output;
+  if (value instanceof Map) {
+    value.forEach((entry: unknown, key: string) => { output[key] = String(entry); });
+    return output;
+  }
+  if (typeof value === "object" && !Array.isArray(value)) {
+    for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+      if (entry !== undefined && entry !== null && entry !== "") output[key] = String(entry);
+    }
+  }
+  return output;
 }
 
 async function getProduct(id: string): Promise<ProductView | null> {
