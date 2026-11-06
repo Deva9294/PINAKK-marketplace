@@ -25,13 +25,13 @@ function validCategory(value: unknown) {
 }
 
 async function seedDefaults() {
-  await Category.bulkWrite(catalogueCategories.map(category => ({
-    updateOne: {
-      filter: { slug: category.slug },
-      update: { $setOnInsert: category },
-      upsert: true
-    }
-  })));
+  if (await Category.countDocuments() > 0) return;
+  try {
+    await Category.insertMany(catalogueCategories, { ordered: false });
+  } catch (error) {
+    // Concurrent first requests can race on the unique slug index; retain whichever insert won.
+    if (!(typeof error === "object" && error !== null && "code" in error && error.code === 11000)) throw error;
+  }
 }
 
 export async function GET(request: NextRequest) {
