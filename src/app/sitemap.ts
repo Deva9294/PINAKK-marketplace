@@ -6,6 +6,7 @@ import Category from "@/models/Category";
 import { catalogueCategories } from "@/lib/catalogue";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pinakk-marketplace.onrender.com";
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
