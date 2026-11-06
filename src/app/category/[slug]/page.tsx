@@ -55,7 +55,7 @@ export default async function CategoryPage({ params }: Props) {
       <nav aria-label="Breadcrumb" style={{ fontSize: 13, marginBottom: 18, color: "#64748b" }}>
         <Link href="/">Home</Link> / <span>{category.name}</span>
       </nav>
-      <header style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(240px,360px)", gap: 24, alignItems: "center", background: "#f8fafc", borderRadius: 20, padding: 22 }}>
+      <header style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,240px),1fr))", gap: 24, alignItems: "center", background: "#f8fafc", borderRadius: 20, padding: 22 }}>
         <div><p style={{ color: "#1e40af", fontWeight: 700, fontSize: 12, letterSpacing: 1 }}>PINAKK COLLECTION</p><h1 style={{ fontSize: 32, lineHeight: 1.15, margin: "8px 0 12px" }}>{category.name}</h1><p style={{ color: "#475569", lineHeight: 1.7 }}>{category.description}</p></div>
         <Image src={category.image} alt={category.name + " category illustration"} width={360} height={236} style={{ width: "100%", height: "auto", borderRadius: 14 }} priority />
       </header>
