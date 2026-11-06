@@ -35,7 +35,9 @@ The readiness endpoint `/api/health` returns HTTP 200 only when the required adm
 
 ## Optional Razorpay environment variables
 
-Set all four values in Render before offering online checkout:
+Online checkout is disabled by default. Keep `PINAKK_ONLINE_PAYMENTS_ENABLED=false` for COD / pay-at-store only. The payment creation and verification APIs return HTTP 403 unless this flag is explicitly set to `true`. Only enable after successful Razorpay test-mode and webhook verification.
+
+Set all four Razorpay values in Render before offering online checkout:
 
 - `RAZORPAY_KEY_ID`: Razorpay API key ID (server-side).
 - `RAZORPAY_KEY_SECRET`: Razorpay API key secret (server-side only).
