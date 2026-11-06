@@ -9,7 +9,7 @@ import {
   Briefcase, Gift, Home, PackageCheck, Phone, MapPin, Tag, Grid3X3,
   Store, X, Sparkles, ArrowRight, Mail
 } from "lucide-react";
-import { products as demoProducts, categories, Product } from "@/lib/products";
+import { products as demoProducts, Product } from "@/lib/products";
 import { catalogueCategories, categoryNames } from "@/lib/catalogue";
 
 type CartItem = { id: string; qty: number };
@@ -27,7 +27,7 @@ const slides = [
   {
     eyebrow: "PAPER, PRINT & CREATE",
     title: "Bring every idea to life.",
-    copy: "Find A4 copier paper, glossy sheets, notebooks and useful office supplies.",
+    copy: "Find school copies, notebooks, MP Board books and everyday stationery.",
     cta: "Shop paper essentials",
     image: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=1800&q=85",
     alt: "Paper and stationery arranged on a desk",
@@ -36,7 +36,7 @@ const slides = [
   {
     eyebrow: "READY FOR THE EVERYDAY",
     title: "Useful finds, chosen well.",
-    copy: "From school bags and accessories to tarpaulin, nets and daily-use products.",
+    copy: "From perfumes and fashion accessories to net products, tirpal and daily-use essentials.",
     cta: "Find your essentials",
     image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1800&q=85",
     alt: "Backpack and everyday carry essentials",
@@ -82,11 +82,12 @@ export default function Storefront() {
     fetch("/api/products")
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(data => {
-        if (Array.isArray(data.products) && data.products.length) {
+        if (Array.isArray(data.products)) {
           setCatalogue(data.products.map((p: any) => ({
             id: String(p._id), name: p.name, category: p.category, price: p.price,
             oldPrice: p.compareAtPrice, description: p.description,
-            image: p.image || "/placeholder-product.png", stock: p.stock, subcategory: p.subcategory || "", badge: undefined
+            image: p.image || catalogueCategories.find(c => c.name === p.category)?.image || "/pinakk-logo.svg",
+            stock: p.stock, subcategory: p.subcategory || "", badge: undefined
           })));
           setCatalogueSource("database");
         }
@@ -102,10 +103,7 @@ export default function Storefront() {
   }, []);
 
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
-  const availableCategories = useMemo(
-    () => ["All", ...categoryNames],
-    [catalogue]
-  );
+  const availableCategories = ["All", ...categoryNames];
   const filtered = useMemo(
     () => catalogue.filter(p =>
       (category === "All" || p.category === category) &&
@@ -116,7 +114,7 @@ export default function Storefront() {
     [query, category, catalogue]
   );
   const suggestions = useMemo(
-    () => query.trim() ? catalogue.filter(p => p.name.toLowerCase().includes(query.toLowerCase())).slice(0, 5) : [],
+    () => query.trim() ? catalogue.filter(p => (p.name + " " + (p.subcategory || "")).toLowerCase().includes(query.toLowerCase())).slice(0, 5) : [],
     [query, catalogue]
   );
 
