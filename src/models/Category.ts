@@ -6,7 +6,7 @@ const CategorySchema = new Schema({
   description: { type: String, trim: true, maxlength: 1000, default: "" },
   image: { type: String, trim: true, maxlength: 2000, default: "" },
   icon: { type: String, trim: true, maxlength: 60, default: "package" },
-  subcategories: { type: [String], default: [] },
+  subcategories: { type: [String], default: [] },\n  filters: { type: [String], default: [] },
   seoTitle: { type: String, trim: true, maxlength: 180, default: "" },
   seoDescription: { type: String, trim: true, maxlength: 320, default: "" },
   active: { type: Boolean, default: true, index: true },
