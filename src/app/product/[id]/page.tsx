@@ -99,7 +99,7 @@ export default async function ProductPage({ params }: PageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
       <header className="pk-detail-header">
         <Link href="/" className="pk-detail-brand"><span>P✦</span><b>PINAKK</b></Link>
-        <Link href="/">Continue shopping <span>↗</span></Link>
+        <div className="pk-detail-header-actions"><Link href="/cart">View shopping bag <span>↗</span></Link><Link href="/">Continue shopping</Link></div>
       </header>
       <div className="pk-detail-breadcrumb"><Link href="/">Home</Link><span>/</span><span>{product.category}</span><span>/</span><b>{product.name}</b></div>
       <section className="pk-detail-card">
