@@ -7,8 +7,8 @@ export const USER_COOKIE = "pinakk_user_session";
 
 // Match legacy accounts saved with either a 10-digit mobile or the +91 prefix.
 export function phoneLookupValues(value: string) {
-  const compact = value.replace(/[\\s-]/g, "");
-  if (!/^(?:\\+91)?[6-9]\\d{9}$/.test(compact)) return [];
+  const compact = value.replace(/[\s-]/g, "");
+  if (!/^(?:\+91)?[6-9]\d{9}$/.test(compact)) return [];
   const local = compact.startsWith("+91") ? compact.slice(3) : compact;
   return [local, "+91" + local];
 }
