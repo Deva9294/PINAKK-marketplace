@@ -39,7 +39,14 @@ export async function POST(request: NextRequest) {
         payment.razorpayPaymentId = entity.id || payment.razorpayPaymentId;
         await payment.save();
       }
-      if (order.paymentStatus !== "paid") {
+      if (order.status === "cancelled") {
+        // A late capture can arrive after an unpaid order was cancelled and stock restored.
+        // Keep the order cancelled, record the captured payment, and flag it for an admin refund.
+        order.paymentStatus = "paid";
+        order.paymentMethod = "razorpay";
+        await order.save();
+        console.error("Captured Razorpay payment received for cancelled order; refund review required:", order.orderNumber, entity.id || "");
+      } else if (order.paymentStatus !== "paid") {
         order.paymentStatus = "paid";
         order.paymentMethod = "razorpay";
         if (order.status === "pending") order.status = "confirmed";
