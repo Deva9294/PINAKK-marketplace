@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
 import {NextRequest,NextResponse} from "next/server";
 import {connectToDatabase} from "@/lib/mongodb";
-import {readUserSession, phoneLookupValues} from "@/lib/user-auth";
+import {readUserSession} from "@/lib/user-auth";
 import {isAdminRequest} from "@/lib/admin-auth";
 import Order from "@/models/Order";
-import User from "@/models/User";
 import InvoiceSettings from "@/models/InvoiceSettings";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
@@ -23,7 +22,7 @@ export async function GET(request:NextRequest,context:{params:Promise<{id:string
  if(!admin&&(!session||session.role!=="customer"))return NextResponse.json({ok:false,error:"Please sign in"},{status:401});
  const {id}=await context.params;if(!mongoose.isValidObjectId(id))return NextResponse.json({ok:false,error:"Invalid order"},{status:400});
  try{
-  await connectToDatabase();const filter:any={_id:id};if(!admin){const user=await User.findById(session!.id).select("phone").lean() as {phone:string}|null;if(!user)return NextResponse.json({ok:false,error:"Account not found"},{status:404});filter.$or=[{customerUserId:session!.id},{customerUserId:null,"customer.phone":{$in:phoneLookupValues(user.phone)}}]}
+  await connectToDatabase();const filter:any={_id:id};if(!admin)filter.customerUserId=session!.id;
   const order=await Order.findOne(filter).lean();if(!order)return NextResponse.json({ok:false,error:"Order not found"},{status:404});
   const settings=await InvoiceSettings.findOne({key:"default"}).lean()||{legalName:"PINAKK",gstin:"",address:"",state:"Madhya Pradesh",stateCode:"23",phone:"",email:"",invoicePrefix:"PIN",defaultGstRate:0,pricesIncludeGst:true};
   const invoiceNo=(order as any).invoiceNumber||settings.invoicePrefix+"-"+new Date(order.createdAt).getFullYear()+"-"+String(order.orderNumber).slice(-8);
