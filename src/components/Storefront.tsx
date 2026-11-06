@@ -254,7 +254,7 @@ export default function Storefront() {
         <div className="pk-section pk-products-inner">
           <div className="pk-section-heading">
             <div><span className="pk-kicker">{catalogueSource === "database" ? "FROM THE PINAKK STORE" : "CATALOGUE TEMPORARILY UNAVAILABLE"}</span><h2 id="pk-products-title">{query ? "Your search results" : category === "All" ? "Worth a closer look." : category + " collection"}</h2><p>Everyday essentials at prices you'll love.</p></div>
-            <span className="pk-result-count">{filtered.length} items</span>
+            <div className="pk-products-heading-actions"><span className="pk-result-count">{filtered.length} items</span><Link href="/products" className="pk-view-all-products">View all products <ArrowUpRight size={15} /></Link></div>
           </div>
           <div className="pk-filter-row">
             {availableCategories.slice(0, 9).map(item => <button key={item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}>{item}</button>)}
@@ -276,7 +276,7 @@ export default function Storefront() {
               </div>
             </article>)}
           </div>
-          {filtered.length === 0 && <div className="pk-empty"><Search size={30} /><b>Nothing found just yet</b><span>Try another product name or browse all collections.</span><button onClick={() => { setQuery(""); setCategory("All"); }}>Show all products</button></div>}
+          {filtered.length === 0 && <div className="pk-empty"><Search size={30} /><b>{catalogue.length === 0 ? (catalogueSource === "database" ? "No products have been published yet" : "Product catalogue is unavailable") : "Nothing found just yet"}</b><span>{catalogue.length === 0 ? "The storefront only displays products saved and published in the product database. The store team needs to add products in Admin → Products." : "Try another product name or browse all collections."}</span>{catalogue.length === 0 ? <Link href="/products" className="pk-empty-link">Open all products</Link> : <button onClick={() => { setQuery(""); setCategory("All"); }}>Show all products</button>}</div>}
         </div>
       </section>
 
