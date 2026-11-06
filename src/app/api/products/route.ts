@@ -50,6 +50,11 @@ export async function GET(request: NextRequest) {
     const filter: Record<string, any> = includeInactive ? {} : { active: true };
     const category = params.get("category")?.trim();
     const brand = params.get("brand")?.trim();
+    const courseFields = ["board","className","medium","stream","session","subject","bookType"] as const;
+    for (const field of courseFields) {
+      const value = params.get(field)?.trim();
+      if (value && value.length <= 100) filter["schoolCourse."+field] = value;
+    }
     const search = params.get("q")?.trim();
     const minPrice = params.get("minPrice");
     const maxPrice = params.get("maxPrice");
@@ -63,6 +68,9 @@ export async function GET(request: NextRequest) {
         { brand: { $regex: escaped, $options: "i" } },
         { category: { $regex: escaped, $options: "i" } },
         { tags: { $regex: escaped, $options: "i" } },
+        { subcategory: { $regex: escaped, $options: "i" } },
+        { sku: { $regex: escaped, $options: "i" } },
+        { barcode: { $regex: escaped, $options: "i" } },
       ];
     }
 
