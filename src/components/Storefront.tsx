@@ -95,12 +95,13 @@ export default function Storefront() {
           setCatalogue(data.products.map((p: any) => ({
             id: String(p._id), name: p.name, category: p.category, price: p.price,
             oldPrice: p.compareAtPrice, description: p.description,
-            image: p.image || "/placeholder-product.png", stock: p.stock, badge: undefined
+            image: p.image || catalogueCategories.find(c => c.name === p.category)?.image || "/pinakk-logo.svg",
+            stock: p.stock, subcategory: p.subcategory || "", badge: undefined
           })));
           setCatalogueSource("database");
         }
       })
-      .catch(() => setCatalogueSource("demo"));
+      .catch(() => setCatalogueSource("unavailable"));
   }, []);
 
   useEffect(() => { localStorage.setItem("pinakk-cart", JSON.stringify(cart)); }, [cart]);
@@ -111,21 +112,19 @@ export default function Storefront() {
   }, []);
 
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
-  const availableCategories = useMemo(
-    () => ["All", ...categories.filter(c => c !== "All")],
-    [catalogue]
-  );
+  const availableCategories = ["All", ...catalogueCategories.map(item => item.name)];
   const filtered = useMemo(
     () => catalogue.filter(p =>
       (category === "All" || p.category === category) &&
       (p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.category.toLowerCase().includes(query.toLowerCase()) ||
-        (p.description || "").toLowerCase().includes(query.toLowerCase()))
+        (p.description || "").toLowerCase().includes(query.toLowerCase()) ||
+        (p.subcategory || "").toLowerCase().includes(query.toLowerCase()))
     ),
     [query, category, catalogue]
   );
   const suggestions = useMemo(
-    () => query.trim() ? catalogue.filter(p => p.name.toLowerCase().includes(query.toLowerCase())).slice(0, 5) : [],
+    () => query.trim() ? catalogue.filter(p => (p.name + " " + (p.subcategory || "")).toLowerCase().includes(query.toLowerCase())).slice(0, 5) : [],
     [query, catalogue]
   );
 
@@ -150,6 +149,7 @@ export default function Storefront() {
   }
 
   const active = slides[slide];
+  const activeCategory = catalogueCategories.find(item => item.name === category);
 
   return (
     <main className="pinakk-store">
@@ -236,6 +236,20 @@ export default function Storefront() {
             </button>;
           })}
         </div>
+        {activeCategory && (
+          <div className="pk-subcategory-panel">
+            <div className="pk-subcategory-heading"><b>Browse {activeCategory.name}</b><span>{activeCategory.subcategories.length} subcategories</span></div>
+            <div className="pk-subcategory-list">
+              {activeCategory.subcategories.map(item => (
+                <button key={item} onClick={() => { setQuery(item); document.getElementById("pk-products")?.scrollIntoView({ behavior: "smooth" }); }}>
+                  <span><Image src={activeCategory.image} alt={activeCategory.name + " illustrative category"} fill sizes="64px" /></span>
+                  <b>{item}</b><ArrowUpRight size={14} />
+                </button>
+              ))}
+            </div>
+            <div className="pk-category-filters"><b>Popular filters</b>{activeCategory.filters.map(item => <span key={item}>{item}</span>)}</div>
+          </div>
+        )}
       </section>
 
       <section className="pk-products-section" id="pk-products" aria-labelledby="pk-products-title">
