@@ -24,7 +24,7 @@ export default async function AllProductsPage({ searchParams }: Props) {
   const filter: Record<string, any> = { active: true };
   if (category && category !== "All") filter.category = category;
   if (query) {
-    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\    const escaped = query.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");");
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     filter.$or = [
       { name: { $regex: escaped, $options: "i" } },
       { brand: { $regex: escaped, $options: "i" } },
