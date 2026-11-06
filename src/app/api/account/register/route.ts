@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
-import { createUserToken, hashPassword, USER_COOKIE, userCookieOptions } from "@/lib/user-auth";
+import { createUserToken, hashPassword, USER_COOKIE, userCookieOptions, phoneLookupValues } from "@/lib/user-auth";
 
 export const runtime = "nodejs";
 
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
 
-    const duplicateConditions: Array<Record<string, string>> = [{ phone }];
+    const duplicateConditions: Array<Record<string, unknown>> = [{ phone: { $in: phoneLookupValues(phone) } }];
     if (email) duplicateConditions.push({ email });
     const exists = await User.findOne({ $or: duplicateConditions }).select("_id").lean();
 
