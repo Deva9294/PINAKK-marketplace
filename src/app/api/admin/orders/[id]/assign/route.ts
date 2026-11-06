@@ -7,8 +7,6 @@ import User from "@/models/User";
 
 export const runtime = "nodejs";
 
-type DeliveryStaff = { _id: mongoose.Types.ObjectId } | null;
-
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -29,40 +27,32 @@ export async function PATCH(
     return NextResponse.json({ ok: false, error: "Invalid request" }, { status: 400 });
   }
 
-  if (typeof body?.deliveryBoyId !== "string" || !mongoose.isValidObjectId(body.deliveryBoyId)) {
-    return NextResponse.json({ ok: false, error: "Valid delivery account is required" }, { status: 400 });
-  }
+  const deliveryBoyId = typeof body?.deliveryBoyId === "string" ? body.deliveryBoyId : "";
+  if (deliveryBoyId && !mongoose.isValidObjectId(deliveryBoyId)) return NextResponse.json({ ok: false, error: "Invalid delivery account" }, { status: 400 });
 
   try {
     await connectToDatabase();
-    const [order, staff] = await Promise.all([
-      Order.findById(id),
-      User.findOne({ _id: body.deliveryBoyId, role: "delivery", active: true })
-        .select("_id")
-        .lean() as Promise<DeliveryStaff>,
-    ]);
+    const order = await Order.findById(id);
 
     if (!order) {
       return NextResponse.json({ ok: false, error: "Order not found" }, { status: 404 });
     }
-    if (!staff) {
-      return NextResponse.json({ ok: false, error: "Active delivery account not found" }, { status: 404 });
-    }
-    if (!["ready", "shipped"].includes(order.status)) {
+    if (order.fulfillmentMethod !== "delivery" || !["ready", "shipped"].includes(order.status)) {
       return NextResponse.json(
         { ok: false, error: "Order must be ready for dispatch before assigning delivery" },
         { status: 409 }
       );
     }
 
-    order.deliveryBoyId = staff._id;
+    if (!deliveryBoyId) {
+      order.deliveryBoyId = null;
+    } else {
+      const staff: any = await User.findOne({ _id: deliveryBoyId, role: "delivery", active: true }).select("_id").lean();
+      if (!staff) return NextResponse.json({ ok: false, error: "Active delivery account not found" }, { status: 404 });
+      order.deliveryBoyId = staff._id;
+    }
     await order.save();
-
-    return NextResponse.json({
-      ok: true,
-      orderNumber: order.orderNumber,
-      deliveryBoyId: String(staff._id),
-    });
+    return NextResponse.json({ ok: true, orderNumber: order.orderNumber, deliveryBoyId: order.deliveryBoyId ? String(order.deliveryBoyId) : null });
   } catch {
     return NextResponse.json({ ok: false, error: "Could not assign delivery" }, { status: 503 });
   }

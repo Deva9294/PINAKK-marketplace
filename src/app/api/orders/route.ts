@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   const customer = body?.customer;
   const method = body?.fulfillmentMethod;
-  const paymentMethod = body?.paymentMethod === "razorpay" ? "razorpay" : "cash";
+  const paymentMethod = "cash"; // Online payments are temporarily disabled; COD / pay-at-store only.
   const items = body?.items as RequestedItem[] | undefined;
   if (!customer || typeof customer.name !== "string" || customer.name.trim().length < 2 || customer.name.length > 100 ||
       typeof customer.phone !== "string" || !/^(?:\+91[- ]?)?[6-9]\d{9}$/.test(customer.phone.replace(/[\s-]/g, "")) ||
@@ -62,9 +62,6 @@ export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
     const session = await readUserSession(request);
-    if (paymentMethod === "razorpay" && (!session || session.role !== "customer")) {
-      return NextResponse.json({ ok: false, error: "Please sign in with a customer account to pay online" }, { status: 401 });
-    }
     if (session && session.role !== "customer") {
       return NextResponse.json({ ok: false, error: "Customer account required to place an order" }, { status: 403 });
     }
@@ -180,12 +177,12 @@ export async function POST(request: NextRequest) {
         city: body.address.city.trim(), state: body.address.state.trim(), postalCode: body.address.postalCode,
       } } : {}),
       items: orderItems, subtotal, deliveryFee, couponCode, discount, total: Math.max(0, subtotal - discount) + deliveryFee + (invoiceSettings.pricesIncludeGst ? 0 : taxTotal),
-      paymentMethod: paymentMethod === "razorpay" ? "razorpay" : (method === "delivery" ? "cash-on-delivery" : "pay-at-store"),
+      paymentMethod: method === "delivery" ? "cash-on-delivery" : "pay-at-store",
       customerNote: typeof body.customerNote === "string" ? body.customerNote.slice(0, 500) : "",
     });
     reserved.length = 0; // Stock is now committed to the saved order.
     reservedCouponId = null; // Coupon usage is committed with the saved order.
-    return NextResponse.json({ ok: true, order: { orderNumber: order.orderNumber, status: order.status, paymentStatus: order.paymentStatus, paymentMethod: order.paymentMethod, subtotal: order.subtotal, deliveryFee: order.deliveryFee, discount: order.discount, taxableValue: order.taxableValue, taxTotal: order.taxTotal, total: order.total, invoiceNumber: order.invoiceNumber, createdAt: order.createdAt } }, { status: 201 });
+    return NextResponse.json({ ok: true, order: { id: String(order._id), fulfillmentMethod: order.fulfillmentMethod, orderNumber: order.orderNumber, status: order.status, paymentStatus: order.paymentStatus, paymentMethod: order.paymentMethod, subtotal: order.subtotal, deliveryFee: order.deliveryFee, discount: order.discount, taxableValue: order.taxableValue, taxTotal: order.taxTotal, total: order.total, invoiceNumber: order.invoiceNumber, createdAt: order.createdAt } }, { status: 201 });
   } catch (error) {
     try { await releaseStock(); } catch (rollbackError) { console.error("Order stock rollback failed:", rollbackError); }
     if (reservedCouponId) { try { await Coupon.updateOne({ _id: reservedCouponId }, { $inc: { usedCount: -1 } }); } catch (rollbackError) { console.error("Coupon usage rollback failed:", rollbackError); } }

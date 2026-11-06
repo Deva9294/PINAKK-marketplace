@@ -17,7 +17,10 @@ export async function PATCH(request:NextRequest,context:{params:Promise<{id:stri
   if(!order)return NextResponse.json({ok:false,error:"Delivery not assigned to this account"},{status:404});
   const allowed:Record<string,string[]>={ready:["shipped"],shipped:["delivered"]};
   if(!allowed[order.status]?.includes(body.status))return NextResponse.json({ok:false,error:"This delivery update is not allowed"},{status:409});
-  order.status=body.status;await order.save();
+  if(body.status==="delivered"&&order.paymentMethod==="cash-on-delivery"&&body.cashCollected!==true)return NextResponse.json({ok:false,error:"Confirm that the COD cash has been collected before completing delivery."},{status:400});
+  order.status=body.status;
+  if(body.status==="delivered"&&order.paymentMethod==="cash-on-delivery")order.paymentStatus="paid";
+  await order.save();
   return NextResponse.json({ok:true,status:order.status});
  }catch{return NextResponse.json({ok:false,error:"Could not update delivery"},{status:503})}
 }

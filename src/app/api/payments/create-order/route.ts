@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     await connectToDatabase();
     const order = await Order.findOne({ orderNumber, customerUserId: session.id });
     if (!order) return NextResponse.json({ ok: false, error: "Order not found" }, { status: 404 });
+    if (order.paymentMethod !== "razorpay") return NextResponse.json({ ok: false, error: "Online payment is temporarily disabled. Choose COD or pay at store." }, { status: 403 });
     if (order.paymentStatus === "paid" || order.status === "cancelled") {
       return NextResponse.json({ ok: false, error: "This order cannot be paid" }, { status: 409 });
     }
