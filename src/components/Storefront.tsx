@@ -244,6 +244,7 @@ export default function Storefront() {
                 </button>
               ))}
             </div>
+            {!!activeCategory.items?.length && <div className="pk-category-item-list"><b>Item list</b><div>{activeCategory.items.map(item => <button key={item} onClick={() => { setQuery(item); document.getElementById("pk-products")?.scrollIntoView({ behavior: "smooth" }); }}>{item}</button>)}</div></div>}
             <div className="pk-category-filters"><b>Popular filters</b>{activeCategory.filters.map(item => <span key={item}>{item}</span>)}</div>
           </div>
         )}
