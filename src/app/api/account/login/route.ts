@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
-import { createUserToken, verifyPassword, USER_COOKIE, userCookieOptions } from "@/lib/user-auth";
+import { createUserToken, verifyPassword, USER_COOKIE, userCookieOptions, phoneLookupValues } from "@/lib/user-auth";
 export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   let body: any;
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   }
   try {
     await connectToDatabase();
-    const user = await User.findOne({ $or:[{ phone:identity },{ email:identity }] });
+    const phoneValues = phoneLookupValues(identity);\n    const user = await User.findOne({ $or:[...(phoneValues.length ? [{ phone: { $in: phoneValues } }] : []), { email:identity }] });
     if (!user || !user.active || !(await verifyPassword(password,user.passwordHash))) return NextResponse.json({ ok:false, error:"Incorrect login details" }, { status:401 });
     const token = await createUserToken({ id:String(user._id), role:user.role });
     const response = NextResponse.json({ ok:true, user:{ name:user.name, phone:user.phone, email:user.email, role:user.role } });
