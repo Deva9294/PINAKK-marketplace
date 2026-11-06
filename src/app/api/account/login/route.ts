@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
   }
   try {
     await connectToDatabase();
-    const phoneValues = phoneLookupValues(identity);\n    const user = await User.findOne({ $or:[...(phoneValues.length ? [{ phone: { $in: phoneValues } }] : []), { email:identity }] });
+    const phoneValues = phoneLookupValues(identity);
+    const user = await User.findOne({ $or:[...(phoneValues.length ? [{ phone: { $in: phoneValues } }] : []), { email:identity }] });
     if (!user || !user.active || !(await verifyPassword(password,user.passwordHash))) return NextResponse.json({ ok:false, error:"Incorrect login details" }, { status:401 });
     const token = await createUserToken({ id:String(user._id), role:user.role });
     const response = NextResponse.json({ ok:true, user:{ name:user.name, phone:user.phone, email:user.email, role:user.role } });
