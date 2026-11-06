@@ -62,9 +62,6 @@ export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
     const session = await readUserSession(request);
-    if (paymentMethod === "razorpay" && (!session || session.role !== "customer")) {
-      return NextResponse.json({ ok: false, error: "Please sign in with a customer account to pay online" }, { status: 401 });
-    }
     if (session && session.role !== "customer") {
       return NextResponse.json({ ok: false, error: "Customer account required to place an order" }, { status: 403 });
     }
@@ -180,7 +177,7 @@ export async function POST(request: NextRequest) {
         city: body.address.city.trim(), state: body.address.state.trim(), postalCode: body.address.postalCode,
       } } : {}),
       items: orderItems, subtotal, deliveryFee, couponCode, discount, total: Math.max(0, subtotal - discount) + deliveryFee + (invoiceSettings.pricesIncludeGst ? 0 : taxTotal),
-      paymentMethod: paymentMethod === "razorpay" ? "razorpay" : (method === "delivery" ? "cash-on-delivery" : "pay-at-store"),
+      paymentMethod: method === "delivery" ? "cash-on-delivery" : "pay-at-store",
       customerNote: typeof body.customerNote === "string" ? body.customerNote.slice(0, 500) : "",
     });
     reserved.length = 0; // Stock is now committed to the saved order.
