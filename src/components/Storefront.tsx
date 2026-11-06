@@ -9,8 +9,8 @@ import {
   Briefcase, Gift, Home, PackageCheck, Phone, MapPin, Tag, Grid3X3,
   Store, X, Sparkles, ArrowRight, Mail
 } from "lucide-react";
-import { products as demoProducts, categories, Product } from "@/lib/products";
-import { catalogueCategories } from "@/lib/catalogue";
+import type { Product } from "@/lib/products";
+import { catalogueCategories, type CatalogueCategory } from "@/lib/catalogue";
 
 type CartItem = { id: string; qty: number };
 
@@ -54,13 +54,7 @@ const categoryIconMap: Record<string, typeof Pencil> = {
   "Net Products": Grid3X3,
   "Tirpal & Tarpaulin": Home
 };
-const categoryTiles = catalogueCategories.map(item => ({
-  title: item.name,
-  sub: item.description,
-  filter: item.name,
-  image: item.image,
-  icon: categoryIconMap[item.name] || PackageCheck
-}));
+
 
 function Brand() {
   return (
@@ -77,6 +71,7 @@ export default function Storefront() {
   const [category, setCategory] = useState("All");
   const [notice, setNotice] = useState("");
   const [catalogue, setCatalogue] = useState<Product[]>([]);
+  const [categoryRecords, setCategoryRecords] = useState<CatalogueCategory[]>(catalogueCategories);
   const [catalogueSource, setCatalogueSource] = useState<"unavailable" | "database">("unavailable");
   const [slide, setSlide] = useState(0);
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -88,6 +83,7 @@ export default function Storefront() {
       setCart(JSON.parse(localStorage.getItem("pinakk-cart") || "[]"));
       setWishlist(JSON.parse(localStorage.getItem("pinakk-wishlist") || "[]"));
     } catch {}
+    fetch("/api/categories", { cache: "no-store" }).then(r => r.ok ? r.json() : Promise.reject()).then(data => { if (Array.isArray(data.categories)) setCategoryRecords(data.categories.filter((c: CatalogueCategory) => c.active !== false)); }).catch(() => setCategoryRecords(catalogueCategories));
     fetch("/api/products")
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(data => {
@@ -112,7 +108,7 @@ export default function Storefront() {
   }, []);
 
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
-  const availableCategories = ["All", ...catalogueCategories.map(item => item.name)];
+  const availableCategories = ["All", ...categoryRecords.map(item => item.name)];
   const filtered = useMemo(
     () => catalogue.filter(p =>
       (category === "All" || p.category === category) &&
@@ -149,7 +145,8 @@ export default function Storefront() {
   }
 
   const active = slides[slide];
-  const activeCategory = catalogueCategories.find(item => item.name === category);
+  const activeCategory = categoryRecords.find(item => item.name === category);
+  const categoryTiles = categoryRecords.map(item => ({ title: item.name, sub: item.description, filter: item.name, image: item.image, icon: categoryIconMap[item.name] || PackageCheck }));
 
   return (
     <main className="pinakk-store">
