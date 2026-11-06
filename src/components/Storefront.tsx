@@ -188,8 +188,8 @@ export default function Storefront() {
       <nav className={mobileMenu ? "pk-navigation is-open" : "pk-navigation"} aria-label="Main navigation">
         <div className="pk-nav-inner">
           <button onClick={() => chooseCategory("All")}><Grid3X3 size={15} /> Explore all</button>
-          {categories.filter(item => item !== "All").map(item =>
-            <button key={item} onClick={() => chooseCategory(item)}>{item}</button>
+          {categoryRecords.map(item =>
+            <button key={item.slug} onClick={() => chooseCategory(item.name)}>{item.name}</button>
           )}
           <button className="pk-offers-link" onClick={() => chooseCategory("All")}><Tag size={14} /> Just arrived</button>
         </div>
