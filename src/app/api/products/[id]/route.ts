@@ -35,7 +35,7 @@ export async function PATCH(request: NextRequest, context: Context) {
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
   }
-  const allowed = ["name", "slug", "sku", "category", "subcategory", "brand", "description", "price", "compareAtPrice", "gstRate", "hsnCode", "image", "images", "specifications", "tags", "stock", "active"];
+  const allowed = ["name", "slug", "sku", "category", "subcategory", "brand", "description", "price", "compareAtPrice", "gstRate", "hsnCode", "image", "images", "specifications", "tags", "stock", "active", "variants", "barcode", "weight", "size", "colour", "gsm", "material", "lowStockThreshold", "customDimensions", "schoolCourse", "seoTitle", "seoDescription"];
   const update: Record<string, unknown> = {};
   for (const key of allowed) if (Object.prototype.hasOwnProperty.call(body, key)) update[key] = body[key];
   if (!Object.keys(update).length) return NextResponse.json({ ok: false, error: "No editable product fields supplied" }, { status: 400 });
