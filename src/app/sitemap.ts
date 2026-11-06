@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
 import Product from "@/models/Product";
+import Category from "@/models/Category";
 import { catalogueCategories } from "@/lib/catalogue";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pinakk-marketplace.onrender.com";
