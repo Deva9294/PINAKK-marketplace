@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { connectToDatabase } from "@/lib/mongodb";
 import ProductModel from "@/models/Product";
 import ProductAddButton from "@/components/ProductAddButton";
+import ProductGallery from "@/components/ProductGallery";
+import { catalogueCategories } from "@/lib/catalogue";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pinakk-marketplace.onrender.com";
 
@@ -102,6 +104,7 @@ export default async function ProductPage({ params }: PageProps) {
   if (!product) notFound();
 
   const productUrl = siteUrl + "/product/" + product.slug;
+  const categorySlug = catalogueCategories.find(category => category.name === product.category)?.slug;
   const structuredData = {
     "@context": "https://schema.org", "@type": "Product",
     name: product.name, description: product.description, image: product.images,
@@ -131,15 +134,12 @@ export default async function ProductPage({ params }: PageProps) {
         <div className="pk-detail-header-actions"><Link href="/cart">Shopping bag ↗</Link><Link href="/">Continue shopping</Link></div>
       </header>
       <nav className="pk-detail-breadcrumb" aria-label="Breadcrumb">
-        <Link href="/">Home</Link><span>/</span><Link href={"/category/" + product.category.toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}>{product.category}</Link>
+        <Link href="/">Home</Link><span>/</span>{categorySlug ? <Link href={"/category/" + categorySlug}>{product.category}</Link> : <span>{product.category}</span>}
         {product.subcategory && <><span>/</span><span>{product.subcategory}</span></>}<span>/</span><b>{product.name}</b>
       </nav>
 
       <section className="pk-detail-layout">
-        <div className="pk-detail-gallery">
-          <div className="pk-detail-main-image"><img src={product.image} alt={product.name} /></div>
-          {product.images.length > 1 && <div className="pk-detail-thumbnails">{product.images.map((image,index) => <div key={image + index}><img src={image} alt={product.name + " view " + (index + 1)} /></div>)}</div>}
-        </div>
+        <ProductGallery images={product.images} name={product.name} />
         <div className="pk-detail-copy">
           <div className="pk-detail-kickers"><span>{product.category}</span>{product.subcategory && <span>{product.subcategory}</span>}</div>
           {product.brand && <p className="pk-detail-brand-name">{product.brand}</p>}
