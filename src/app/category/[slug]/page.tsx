@@ -78,7 +78,7 @@ export default async function CategoryPage({ params }: Props) {
       <section style={{ marginTop: 32 }}><h2 style={{ fontSize: 22, marginBottom: 14 }}>Available products <span style={{ fontSize: 13, color: "#64748b" }}>({products.length})</span></h2>
         {products.length ? <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(170px,1fr))", gap: 14 }}>
           {products.map(p => <Link key={String(p._id)} href={"/product/" + String(p._id)} style={{ border: "1px solid #e5e7eb", borderRadius: 14, overflow: "hidden", background: "#fff", color: "inherit", textDecoration: "none" }}>
-            <div style={{ background: "#f8fafc", padding: 12 }}><Image src={p.image || category.image} alt={p.name} width={240} height={180} style={{ width: "100%", height: 150, objectFit: "contain" }} /></div>
+            <div style={{ background: "#f8fafc", padding: 12 }}><Image src={p.image || "/pinakk-logo.svg"} alt={p.name} width={240} height={180} style={{ width: "100%", height: 150, objectFit: "contain" }} /></div>
             <div style={{ padding: 12 }}><small style={{ color: "#64748b" }}>{p.subcategory || category.name}</small><b style={{ display: "block", margin: "6px 0", fontSize: 13 }}>{p.name}</b><strong>₹{Number(p.price).toLocaleString("en-IN")}</strong><small style={{ display: "block", color: p.stock > 0 ? "#15803d" : "#b91c1c", marginTop: 5 }}>{p.stock > 0 ? "In stock" : "Out of stock"}</small></div>
           </Link>)}
         </div> : <p style={{ color: "#64748b", background: "#f8fafc", padding: 18, borderRadius: 12 }}>No products are listed in this category yet. Please check back soon.</p>}
