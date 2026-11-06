@@ -13,11 +13,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "PINAKK – Stationery, School Books, Paper & Everyday Essentials",
+    default: "PINAKK – Stationery, Notebooks, School Courses, Perfumes, Belts, Nets & Tirpal",
     template: "%s | PINAKK",
   },
   description:
-    "Shop stationery, school books and courses, A4 copy paper, glossy paper, school bags, perfumes, belts, tarpaulin, nets and daily-use essentials at PINAKK. Serving Rehti, Sehore and nearby areas.",
+    "Shop stationery, copies and notebooks, MP Board and NCERT school courses, general items, perfumes, belts, net products and tirpal at PINAKK. Serving Rehti, Sehore and nearby areas.",
   applicationName: siteName,
   category: "shopping",
   alternates: {
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   keywords: [
     "PINAKK",
     "buy stationery online",
-    "school books online",
+    "school books online",\n    "copy and notebook online",\n    "perfume and fragrance online",\n    "belts and fashion accessories",\n    "agriculture shade net",\n    "HDPE tirpal and tarpaulin",
     "school course books",
     "Pariksha Bodh books",
     "A4 copy paper",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     siteName,
     title: "PINAKK – Shop Smart, Live Better",
     description:
-      "Discover stationery, school books, printing paper, bags and everyday essentials at PINAKK.",
+      "Discover stationery, copies, school books, general items, perfumes, belts, net products and tarpaulin at PINAKK.",
     url: siteUrl,
     images: [{ url: "/pinakk-logo.svg", alt: "PINAKK – Shop Smart, Live Better" }],
   },
