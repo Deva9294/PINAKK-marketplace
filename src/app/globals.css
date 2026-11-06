@@ -195,3 +195,5 @@
 .pk-category-filters>b{font-size:10px;color:#475467;margin-right:3px}
 .pk-category-filters>span{font-size:9px;color:#526078;background:#f1f4f9;border-radius:20px;padding:6px 9px}
 @media(max-width:700px){.pk-subcategory-panel{margin:14px 12px 0;padding:12px}.pk-subcategory-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.pk-subcategory-list button{padding:7px}.pk-subcategory-list button>span{width:36px;height:36px;flex-basis:36px}.pk-subcategory-list button>b{font-size:9px}}
+
+.pk-category-item-list{margin-top:14px}.pk-category-item-list>b{display:block;font-size:10px;color:#475467;margin-bottom:7px}.pk-category-item-list>div{display:flex;flex-wrap:wrap;gap:6px}.pk-category-item-list button{border:1px solid #e5eaf2;border-radius:20px;background:#fff;padding:6px 9px;font-size:9px;color:#536176;cursor:pointer}.pk-category-item-list button:hover{border-color:#1e40af;color:#1e40af;background:#f5f7ff}
