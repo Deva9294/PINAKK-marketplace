@@ -20,7 +20,7 @@ export default async function AllProductsPage({ searchParams }: Props) {
   const category = (params.category || "").trim().slice(0, 80);
   const page = Math.max(1, Math.min(10000, Number(params.page) || 1));
   const sortKey = params.sort || "newest";
-  const sort = sortKey === "price-low" ? { price: 1 as const } : sortKey === "price-high" ? { price: -1 as const } : { createdAt: -1 as const };
+  const sort: Record<string, 1 | -1> = sortKey === "price-low" ? { price: 1 } : sortKey === "price-high" ? { price: -1 } : { createdAt: -1 };
   const filter: Record<string, any> = { active: true };
   if (category && category !== "All") filter.category = category;
   if (query) {
