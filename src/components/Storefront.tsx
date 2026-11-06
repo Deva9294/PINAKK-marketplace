@@ -272,6 +272,7 @@ export default function Storefront() {
                 <div className="pk-price-row"><b>₹{p.price.toLocaleString("en-IN")}</b>{p.oldPrice && p.oldPrice > p.price && <del>₹{p.oldPrice.toLocaleString("en-IN")}</del>}{p.oldPrice && p.oldPrice > p.price && <em>{Math.round((1 - p.price / p.oldPrice) * 100)}% off</em>}</div>
                 <small className={p.stock > 0 ? "pk-stock" : "pk-out-stock"}>{p.stock > 0 ? "Available to order" : "Currently unavailable"}</small>
                 <button className="pk-add-button" disabled={p.stock === 0} onClick={() => add(p)}><Plus size={15} /> Add to bag</button>
+                <Link href={"/product/" + p.id} className="pk-product-detail-link">View full details <ArrowUpRight size={14} /></Link>
               </div>
             </article>)}
           </div>
