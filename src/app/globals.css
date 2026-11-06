@@ -178,3 +178,20 @@
 .pa-table-action{border:1px solid #dce3ed;border-radius:7px;background:white;padding:6px 8px;margin:2px;color:#1e40af;font-size:9px;font-weight:750;text-decoration:none;cursor:pointer}
 @media(max-width:900px){.pa-sidebar{width:205px}.pa-main{margin-left:205px}.pa-content{padding:20px}.pa-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.pa-dashboard-grid{grid-template-columns:1fr}.pa-user{gap:7px}.pa-delivery-link{display:none}}
 @media(max-width:650px){.pinakk-account{padding:12px}.pinakk-account-card{margin:24px auto;padding:22px}.pinakk-account-body{margin:18px auto}.pinakk-account-welcome{align-items:flex-start;flex-direction:column}.pinakk-account-summary{grid-template-columns:1fr;gap:8px}.pinakk-account-summary article{display:grid;grid-template-columns:28px 1fr;align-items:center;padding:12px}.pinakk-account-summary article svg{grid-row:span 2}.pinakk-account-summary article b{font-size:16px}.pinakk-account-orders{padding:13px}.pinakk-account-orders>article{flex-direction:column;gap:8px}.pinakk-order-meta{align-items:flex-start}.pinakk-checkout-grid{grid-template-columns:1fr}.pa-footer{flex-direction:column}.pa-sidebar{position:static;width:auto;min-height:auto;display:flex;flex-direction:row;align-items:center;overflow:auto;padding:8px}.pa-sidebar .pa-brand{margin:0;flex-shrink:0}.pa-sidebar .pa-brand small,.pa-nav-label,.pa-sidebar-foot{display:none}.pa-sidebar>button{padding:9px;font-size:0;flex-shrink:0}.pa-sidebar .pa-logout{margin:0}.pa-main{margin:0}.pa-topbar{height:auto;min-height:58px;padding:10px 12px}.pa-user>span:not(.pa-avatar){display:none}.pa-content{padding:16px 12px}.pa-heading h1{font-size:22px}.pa-stats{gap:8px}.pa-stats article{padding:12px}.pa-stats article>b{font-size:19px}.pa-toolbar{align-items:stretch;flex-direction:column}.pa-product-form{grid-template-columns:1fr}.pa-wide{grid-column:auto}.pa-recent-row{grid-template-columns:1fr auto}.pa-recent-row .pa-status{grid-column:2}.pa-login-card{margin:22px auto;padding:22px}}
+
+/* Eight-category illustrated catalogue */
+.pk-subcategory-panel{margin:18px 22px 0;padding:18px;background:#fff;border:1px solid #e8edf4;border-radius:16px}
+.pk-subcategory-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.pk-subcategory-heading b{font-size:14px;color:#172033}
+.pk-subcategory-heading span{font-size:10px;color:#7b8798}
+.pk-subcategory-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.pk-subcategory-list button{display:flex;align-items:center;gap:9px;min-width:0;padding:8px;border:1px solid #edf0f5;border-radius:11px;background:#fbfcfe;text-align:left;color:#344054;cursor:pointer}
+.pk-subcategory-list button:hover{border-color:#bdcaf1;background:#f4f6ff}
+.pk-subcategory-list button>span{width:42px;height:42px;position:relative;flex:0 0 42px;border-radius:8px;overflow:hidden;background:#f0f3f8}
+.pk-subcategory-list button>span img{object-fit:cover}
+.pk-subcategory-list button>b{font-size:10px;line-height:1.35;flex:1}
+.pk-subcategory-list button>svg{color:#8b96a8;flex:0 0 auto}
+.pk-category-filters{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:14px}
+.pk-category-filters>b{font-size:10px;color:#475467;margin-right:3px}
+.pk-category-filters>span{font-size:9px;color:#526078;background:#f1f4f9;border-radius:20px;padding:6px 9px}
+@media(max-width:700px){.pk-subcategory-panel{margin:14px 12px 0;padding:12px}.pk-subcategory-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.pk-subcategory-list button{padding:7px}.pk-subcategory-list button>span{width:36px;height:36px;flex-basis:36px}.pk-subcategory-list button>b{font-size:9px}}
