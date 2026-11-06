@@ -76,8 +76,8 @@ export default function Storefront() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [notice, setNotice] = useState("");
-  const [catalogue, setCatalogue] = useState<Product[]>(demoProducts);
-  const [catalogueSource, setCatalogueSource] = useState<"demo" | "database">("demo");
+  const [catalogue, setCatalogue] = useState<Product[]>([]);
+  const [catalogueSource, setCatalogueSource] = useState<"unavailable" | "database">("unavailable");
   const [slide, setSlide] = useState(0);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -91,7 +91,7 @@ export default function Storefront() {
     fetch("/api/products")
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(data => {
-        if (Array.isArray(data.products) && data.products.length) {
+        if (Array.isArray(data.products)) {
           setCatalogue(data.products.map((p: any) => ({
             id: String(p._id), name: p.name, category: p.category, price: p.price,
             oldPrice: p.compareAtPrice, description: p.description,
@@ -241,7 +241,7 @@ export default function Storefront() {
       <section className="pk-products-section" id="pk-products" aria-labelledby="pk-products-title">
         <div className="pk-section pk-products-inner">
           <div className="pk-section-heading">
-            <div><span className="pk-kicker">{catalogueSource === "database" ? "FROM THE PINAKK STORE" : "A FEW GOOD PICKS"}</span><h2 id="pk-products-title">{query ? "Your search results" : category === "All" ? "Worth a closer look." : category + " collection"}</h2><p>Everyday essentials at prices you'll love.</p></div>
+            <div><span className="pk-kicker">{catalogueSource === "database" ? "FROM THE PINAKK STORE" : "CATALOGUE TEMPORARILY UNAVAILABLE"}</span><h2 id="pk-products-title">{query ? "Your search results" : category === "All" ? "Worth a closer look." : category + " collection"}</h2><p>Everyday essentials at prices you'll love.</p></div>
             <span className="pk-result-count">{filtered.length} items</span>
           </div>
           <div className="pk-filter-row">
