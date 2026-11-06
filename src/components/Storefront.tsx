@@ -91,7 +91,7 @@ export default function Storefront() {
           setCatalogue(data.products.map((p: any) => ({
             id: String(p._id), name: p.name, category: p.category, price: p.price,
             oldPrice: p.compareAtPrice, description: p.description,
-            image: p.image || catalogueCategories.find(c => c.name === p.category)?.image || "/pinakk-logo.svg",
+            image: p.image || "/pinakk-logo.svg",
             stock: p.stock, subcategory: p.subcategory || "", badge: undefined
           })));
           setCatalogueSource("database");
