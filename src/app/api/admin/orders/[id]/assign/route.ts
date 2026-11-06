@@ -7,8 +7,6 @@ import User from "@/models/User";
 
 export const runtime = "nodejs";
 
-type DeliveryStaff = { _id: mongoose.Types.ObjectId } | null;
-
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
