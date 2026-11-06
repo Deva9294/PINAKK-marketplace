@@ -55,6 +55,7 @@ export default function CartPage() {
     [cart, catalogue]
   );
   const total = items.reduce((sum, item) => sum + (item.product?.price || 0) * item.qty, 0);
+  const hasStockIssues = items.some(item => !item.product || (item.product.stock ?? 0) < item.qty);
 
   function update(id: string, delta: number) {
     const product = catalogue.find(item => item.id === id);
@@ -82,7 +83,7 @@ export default function CartPage() {
           <div className="qty"><button aria-label="Decrease quantity" onClick={() => update(item.id, -1)}><Minus size={14}/></button><b>{item.qty}</b><button aria-label="Increase quantity" disabled={item.qty >= Math.min(20, item.product?.stock ?? 20)} onClick={() => update(item.id, 1)}><Plus size={14}/></button></div>
           <button className="remove" aria-label="Remove item" onClick={() => setCart(old => old.filter(current => current.id !== item.id))}><Trash2 size={16}/></button>
         </div>)}</div>
-        <aside className="summary"><h3>Order summary</h3><div><span>Subtotal</span><b>₹{total.toLocaleString("en-IN")}</b></div><div><span>Delivery</span><b>Calculated at checkout</b></div><hr/><div className="grand"><span>Estimated total</span><b>₹{total.toLocaleString("en-IN")}</b></div><p>Choose store pickup or home delivery, then select online payment or cash on delivery at checkout.</p><Link className="primary-btn checkout" href="/checkout">Continue to checkout</Link><small className="secure-note">Secure online payment with Razorpay (when configured), or pay at store / cash on delivery.</small></aside>
+        <aside className="summary"><h3>Order summary</h3><div><span>Subtotal</span><b>₹{total.toLocaleString("en-IN")}</b></div><div><span>Delivery</span><b>Calculated at checkout</b></div><hr/><div className="grand"><span>Estimated total</span><b>₹{total.toLocaleString("en-IN")}</b></div><p>Choose store pickup or home delivery, then select online payment or cash on delivery at checkout.</p>{hasStockIssues ? <p className="pa-error">Please remove unavailable items or reduce quantities to the available stock before checkout.</p> : <Link className="primary-btn checkout" href="/checkout">Continue to checkout</Link>}<small className="secure-note">Secure online payment with Razorpay (when configured), or pay at store / cash on delivery.</small></aside>
       </div>}
       {!catalogueReady && items.length > 0 && <small>Refreshing product availability…</small>}
     </div>
