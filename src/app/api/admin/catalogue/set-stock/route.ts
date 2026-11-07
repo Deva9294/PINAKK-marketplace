@@ -7,6 +7,11 @@ import { catalogueCategories } from "@/lib/catalogue";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function slugify(value: string) {
+  return value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 150);
+}
+
 export async function POST(request: NextRequest) {
   if (!(await isAdminRequest(request))) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
@@ -23,9 +28,7 @@ export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
     const slugs = catalogueCategories.flatMap(category =>
-      category.items.map(item => category.slug + "-" + item.toLowerCase().normalize("NFKD")
-        .replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "").slice(0, 150))
+      category.items.map(item => category.slug + "-" + slugify(item))
     );
     const filter = { slug: { $in: slugs } };
     const matched = await Product.countDocuments(filter);
