@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   if (!customer || typeof customer.name !== "string" || customer.name.trim().length < 2 || customer.name.length > 100 ||
       typeof customer.phone !== "string" || !/^(?:\+91[- ]?)?[6-9]\d{9}$/.test(customer.phone.replace(/[\s-]/g, "")) ||
       (customer.email !== undefined && (typeof customer.email !== "string" || customer.email.length > 254)) ||
-      !["pickup", "delivery"].includes(method) || !Array.isArray(items) || items.length < 1 || items.length > 20) {
+      !["pickup", "delivery"].includes(method) || !Array.isArray(items) || items.length < 1 || items.length > 50) {
     return NextResponse.json({ ok: false, error: "Customer, fulfilment method or items are invalid" }, { status: 400 });
   }
 
