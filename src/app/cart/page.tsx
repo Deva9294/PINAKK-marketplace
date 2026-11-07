@@ -28,7 +28,7 @@ export default function CartPage() {
     setHydrated(true);
 
     if (saved.length) {
-      const ids = [...new Set(saved.map(item => item.id))].slice(0, 20);
+      const ids = [...new Set(saved.map(item => item.id))].slice(0, 50);
       fetch("/api/products?ids=" + encodeURIComponent(ids.join(",")), { cache: "no-store" })
         .then(response => response.ok ? response.json() : Promise.reject())
         .then(data => {
