@@ -7,7 +7,7 @@ export const runtime="nodejs";
 export const dynamic="force-dynamic";
 export async function POST(request:NextRequest){
  try{
-  const body=await request.json();if(!Array.isArray(body.items)||body.items.length<1||body.items.length>20)return NextResponse.json({ok:false,error:"Invalid cart"},{status:400});
+  const body=await request.json();if(!Array.isArray(body.items)||body.items.length<1||body.items.length>50)return NextResponse.json({ok:false,error:"Invalid cart"},{status:400});
   const ids=body.items.map((x:any)=>String(x.productId||""));
   if(ids.some((id:string)=>!mongoose.isValidObjectId(id)))return NextResponse.json({ok:false,error:"Invalid product"},{status:400});
   const products=await Product.find({_id:{$in:ids},active:true}).lean();if(products.length!==new Set(ids).size)return NextResponse.json({ok:false,error:"A product is unavailable"},{status:409});
