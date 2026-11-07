@@ -49,6 +49,14 @@ export async function GET(request: NextRequest) {
     const params = request.nextUrl.searchParams;
     const includeInactive = params.get("all") === "1" && await isAdminRequest(request);
     const filter: Record<string, any> = includeInactive ? {} : { active: true };
+    const idsParam = params.get("ids");
+    if (idsParam) {
+      const requestedIds = idsParam.split(",").map(id => id.trim()).filter(Boolean);
+      if (requestedIds.length < 1 || requestedIds.length > 20 || requestedIds.some(id => !/^[a-f0-9]{24}$/i.test(id))) {
+        return NextResponse.json({ ok: false, error: "Invalid product ID list" }, { status: 400 });
+      }
+      filter._id = { $in: [...new Set(requestedIds)] };
+    }
     const category = params.get("category")?.trim();
     const brand = params.get("brand")?.trim();
     const courseFields = ["board","className","medium","stream","session","subject","bookType"] as const;
