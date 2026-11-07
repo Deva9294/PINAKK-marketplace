@@ -64,15 +64,16 @@ export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
     const auth = await readUserSession(request);
-    dbSession = await mongoose.startSession();
+    const transactionSession = await mongoose.startSession();
+    dbSession = transactionSession;
 
-    await dbSession.withTransaction(async () => {
+    await transactionSession.withTransaction(async () => {
       if (auth && auth.role !== "customer") {
         throw new CheckoutError("Customer account required to place an order", 403);
       }
 
       const account = auth
-        ? await User.findById(auth.id).select("name phone email active").session(dbSession).lean() as
+        ? await User.findById(auth.id).select("name phone email active").session(transactionSession).lean() as
           { name: string; phone: string; email?: string; active: boolean } | null
         : null;
       if (auth && (!account || !account.active)) {
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
           };
 
       const ids = [...quantities.keys()];
-      const products = await Product.find({ _id: { $in: ids }, active: true }).session(dbSession).lean();
+      const products = await Product.find({ _id: { $in: ids }, active: true }).session(transactionSession).lean();
       if (products.length !== ids.length) {
         throw new CheckoutError("A product is no longer available. Refresh your cart.", 409);
       }
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
         const before = await Product.findOneAndUpdate(
           { _id: id, active: true, stock: { $gte: quantity } },
           { $inc: { stock: -quantity } },
-          { new: false, projection: { name: 1, stock: 1 }, session: dbSession }
+          { new: false, projection: { name: 1, stock: 1 }, session: transactionSession }
         ).lean();
         if (!before) {
           const name = products.find((product: any) => String(product._id) === id)?.name || "one item";
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
           afterStock: before.stock - quantity,
           reference: "checkout",
           note: "Stock reserved for customer order"
-        }], { session: dbSession });
+        }], { session: transactionSession });
       }
 
       const orderItems = products.map((product: any) => {
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
         if (!/^[A-Z0-9_-]{3,32}$/.test(couponCode)) {
           throw new CheckoutError("Coupon code is invalid", 400);
         }
-        const coupon = await Coupon.findOne({ code: couponCode, active: true }).session(dbSession);
+        const coupon = await Coupon.findOne({ code: couponCode, active: true }).session(transactionSession);
         const now = new Date();
         if (!coupon || (coupon.startsAt && coupon.startsAt > now) ||
             (coupon.expiresAt && coupon.expiresAt < now) ||
@@ -161,14 +162,14 @@ export async function POST(request: NextRequest) {
             $or: [{ usageLimit: 0 }, { $expr: { $lt: ["$usedCount", "$usageLimit"] } }]
           },
           { $inc: { usedCount: 1 } },
-          { new: true, session: dbSession }
+          { new: true, session: transactionSession }
         );
         if (!claimed) throw new CheckoutError("Coupon usage limit has been reached", 409);
       }
 
       let deliveryFee = 0;
       if (method === "delivery") {
-        const settings = await ShippingSettings.findOne({ key: "default" }).session(dbSession).lean();
+        const settings = await ShippingSettings.findOne({ key: "default" }).session(transactionSession).lean();
         const postalCode = body.address.postalCode;
         const matchingZone = settings?.zones?.find((zone: any) => zone.pincodes.includes(postalCode));
         if (matchingZone && !matchingZone.active) {
@@ -182,7 +183,7 @@ export async function POST(request: NextRequest) {
         deliveryFee = freeAbove > 0 && subtotal - discount >= freeAbove ? 0 : fee;
       }
 
-      const invoiceSettings = await InvoiceSettings.findOne({ key: "default" }).session(dbSession).lean() ||
+      const invoiceSettings = await InvoiceSettings.findOne({ key: "default" }).session(transactionSession).lean() ||
         { defaultGstRate: 0, pricesIncludeGst: true, invoicePrefix: "PIN" };
       let taxableValue = 0;
       let taxTotal = 0;
@@ -225,7 +226,7 @@ export async function POST(request: NextRequest) {
           (invoiceSettings.pricesIncludeGst ? 0 : taxTotal),
         paymentMethod: method === "delivery" ? "cash-on-delivery" : "pay-at-store",
         customerNote: typeof body.customerNote === "string" ? body.customerNote.slice(0, 500) : ""
-      }], { session: dbSession });
+      }], { session: transactionSession });
       createdOrder = order;
     });
 
