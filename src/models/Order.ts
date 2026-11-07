@@ -26,7 +26,7 @@ const OrderSchema = new Schema({
     state: { type: String, trim: true, maxlength: 100 },
     postalCode: { type: String, trim: true, maxlength: 10 },
   },
-  items: { type: [OrderItemSchema], required: true, validate: [(v: unknown[]) => v.length > 0 && v.length <= 20, "Order must contain 1–20 items"] },
+  items: { type: [OrderItemSchema], required: true, validate: [(v: unknown[]) => v.length > 0 && v.length <= 50, "Order must contain 1–50 items"] },
   subtotal: { type: Number, required: true, min: 0 },
   invoiceNumber: { type: String, trim: true, maxlength: 40, index: true },
   taxableValue: { type: Number, default: 0, min: 0 },
