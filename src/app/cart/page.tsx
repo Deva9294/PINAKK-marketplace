@@ -14,35 +14,43 @@ export default function CartPage() {
   const [catalogueReady, setCatalogueReady] = useState(false);
 
   useEffect(() => {
+    let saved: CartItem[] = [];
     try {
-      const saved = JSON.parse(localStorage.getItem("pinakk-cart") || "[]");
-      setCart(Array.isArray(saved) ? saved.filter((item: any) =>
+      const parsed = JSON.parse(localStorage.getItem("pinakk-cart") || "[]");
+      saved = Array.isArray(parsed) ? parsed.filter((item: any) =>
         item && typeof item.id === "string" && Number.isInteger(item.qty) && item.qty > 0
-      ) : []);
+      ) : [];
+      setCart(saved);
     } catch {
       setCart([]);
       localStorage.removeItem("pinakk-cart");
     }
     setHydrated(true);
 
-    fetch("/api/products")
-      .then(response => response.ok ? response.json() : Promise.reject())
-      .then(data => {
-        if (Array.isArray(data.products)) {
-          setCatalogue(data.products.map((product: any) => ({
-            id: String(product._id),
-            name: product.name,
-            category: product.category,
-            price: product.price,
-            oldPrice: product.compareAtPrice,
-            description: product.description,
-            image: product.image || "",
-            stock: product.stock
-          })));
-        }
-      })
-      .catch(() => {})
-      .finally(() => setCatalogueReady(true));
+    if (saved.length) {
+      const ids = [...new Set(saved.map(item => item.id))].slice(0, 20);
+      fetch("/api/products?ids=" + encodeURIComponent(ids.join(",")), { cache: "no-store" })
+        .then(response => response.ok ? response.json() : Promise.reject())
+        .then(data => {
+          if (Array.isArray(data.products)) {
+            setCatalogue(data.products.map((product: any) => ({
+              id: String(product._id),
+              name: product.name,
+              category: product.category,
+              price: product.price,
+              oldPrice: product.compareAtPrice,
+              description: product.description,
+              image: product.image || "",
+              stock: product.stock
+            })));
+          }
+        })
+        .catch(() => {})
+        .finally(() => setCatalogueReady(true));
+    } else {
+      setCatalogue([]);
+      setCatalogueReady(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -50,8 +58,7 @@ export default function CartPage() {
   }, [cart, hydrated]);
 
   const items = useMemo(
-    () => cart.map(item => ({ ...item, product: catalogue.find(product => product.id === item.id) }))
-      .filter(item => item.product),
+    () => cart.map(item => ({ ...item, product: catalogue.find(product => product.id === item.id) })),
     [cart, catalogue]
   );
   const total = items.reduce((sum, item) => sum + (item.product?.price || 0) * item.qty, 0);
@@ -79,7 +86,7 @@ export default function CartPage() {
       <div className="cart-layout">
         <div className="cart-items">{items.map(item => <div className="cart-row" key={item.id}>
           <div className="cart-thumb" style={{ backgroundImage: "url(" + item.product?.image + ")" }}/>
-          <div className="cart-desc"><small>{item.product?.category}</small><b>{item.product?.name}</b><span>₹{item.product?.price?.toLocaleString("en-IN")}</span>{(item.product?.stock ?? 0) < 1 && <small className="pa-error">Currently out of stock</small>}</div>
+          <div className="cart-desc"><small>{item.product?.category}</small><b>{item.product?.name || "Product no longer available"}</b><span>{item.product ? "₹" + item.product.price.toLocaleString("en-IN") : "Unavailable"}</span>{(!item.product || (item.product.stock ?? 0) < 1) && <small className="pa-error">{item.product ? "Currently out of stock" : "Remove this item to continue"}</small>}</div>
           <div className="qty"><button aria-label="Decrease quantity" onClick={() => update(item.id, -1)}><Minus size={14}/></button><b>{item.qty}</b><button aria-label="Increase quantity" disabled={item.qty >= Math.min(20, item.product?.stock ?? 20)} onClick={() => update(item.id, 1)}><Plus size={14}/></button></div>
           <button className="remove" aria-label="Remove item" onClick={() => setCart(old => old.filter(current => current.id !== item.id))}><Trash2 size={16}/></button>
         </div>)}</div>
