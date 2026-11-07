@@ -48,6 +48,17 @@ export async function PATCH(request: NextRequest, context: Context) {
   if (typeof update.stock === "number" && (!Number.isInteger(update.stock) || update.stock < 0)) return NextResponse.json({ ok: false, error: "Invalid product stock" }, { status: 400 });
   try {
     await connectToDatabase();
+    if (update.active === true) {
+      const current = await Product.findById(id).select("price image images").lean() as any;
+      if (!current) return NextResponse.json({ ok: false, error: "Product not found" }, { status: 404 });
+      const nextPrice = typeof update.price === "number" ? update.price : current.price;
+      const nextImage = typeof update.image === "string" ? update.image : current.image;
+      const nextImages = Array.isArray(update.images) ? update.images : current.images;
+      const hasItemImage = (typeof nextImage === "string" && nextImage.trim().length > 0 && !nextImage.startsWith("/catalogue/category-")) ||
+        (Array.isArray(nextImages) && nextImages.some((image: unknown) => typeof image === "string" && image.trim().length > 0 && !image.startsWith("/catalogue/category-")));
+      if (!(nextPrice > 0)) return NextResponse.json({ ok: false, error: "Enter the actual selling price before publishing this product" }, { status: 400 });
+      if (!hasItemImage) return NextResponse.json({ ok: false, error: "Add an item-specific product photo before publishing this product" }, { status: 400 });
+    }
     const previous = typeof update.stock === "number"
       ? await Product.findById(id).select("name stock").lean()
       : null;
