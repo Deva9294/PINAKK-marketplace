@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const idsParam = params.get("ids");
     if (idsParam) {
       const requestedIds = idsParam.split(",").map(id => id.trim()).filter(Boolean);
-      if (requestedIds.length < 1 || requestedIds.length > 20 || requestedIds.some(id => !/^[a-f0-9]{24}$/i.test(id))) {
+      if (requestedIds.length < 1 || requestedIds.length > 50 || requestedIds.some(id => !/^[a-f0-9]{24}$/i.test(id))) {
         return NextResponse.json({ ok: false, error: "Invalid product ID list" }, { status: 400 });
       }
       filter._id = { $in: [...new Set(requestedIds)] };
