@@ -106,6 +106,22 @@ export default async function AllProductsPage({ searchParams }: Props) {
           <h2 style={{ fontSize: 22, margin: "0 0 8px" }}>{total === 0 && !query && !category ? "Products are not published yet" : "No products match your search"}</h2>
           <p style={{ color: "#64748b", maxWidth: 520, margin: "0 auto 18px", lineHeight: 1.6 }}>{total === 0 && !query && !category ? "The store catalogue currently has no active product records. The store team needs to add and publish products in the admin dashboard. We have not inserted sample or made-up products." : "Try a different product name or category, or clear your filters to browse the full catalogue."}</p>
           <Link href="/products" style={{ display: "inline-block", background: "#1e40af", color: "white", padding: "11px 18px", borderRadius: 10, textDecoration: "none", fontWeight: 700 }}>Show all products</Link>
+          <section style={{ maxWidth: 1000, margin: "34px auto 0", textAlign: "left" }}>
+            <h2 style={{ fontSize: 22, marginBottom: 6 }}>Browse the PINAKK catalogue</h2>
+            <p style={{ color: "#64748b", lineHeight: 1.6, marginBottom: 18 }}>These are catalogue item names, not yet live sale listings. A product becomes orderable after the store adds its verified item photo, actual price and available stock in Admin → Products and publishes it.</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 14 }}>
+              {catalogueCategories.filter(c => !category || category === "All" || c.name === category).map(c => {
+                const visibleItems = c.items.filter(item => !query || item.toLowerCase().includes(query.toLowerCase()));
+                if (!visibleItems.length) return null;
+                return <article key={c.slug} style={{ background: "white", border: "1px solid #e5e7eb", borderRadius: 13, padding: 15 }}>
+                  <h3 style={{ fontSize: 16, margin: "0 0 10px" }}>{c.name}</h3>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {visibleItems.map(item => <span key={item} style={{ background: "#f1f5f9", borderRadius: 20, padding: "5px 9px", fontSize: 12, color: "#334155" }}>{item}</span>)}
+                  </div>
+                </article>;
+              })}
+            </div>
+          </section>
         </div>
       )}
       {pages > 1 && <nav aria-label="Product pages" style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 28, alignItems: "center" }}>
