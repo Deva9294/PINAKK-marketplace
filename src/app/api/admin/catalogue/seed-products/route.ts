@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         description: item + " — catalogue draft. Add verified product photos, actual selling price, stock and specifications before publishing.",
         price: 0,
         stock: 0,
-        image: category.image,
+        image: "",
         tags: [item, category.name],
         active: false
       }))
