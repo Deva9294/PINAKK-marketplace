@@ -71,8 +71,8 @@ function estimatePrice(category: string, name: string): number {
     if (/card holder|keychain|socks|handkerchief/.test(n)) return 49;
     return 149;
   }
-  if (category === "Net Products") return 299; // indicative starting price; size/GSM changes final quote
-  if (category === "Tirpal & Tarpaulin") return 399; // indicative starting price; size/GSM changes final quote
+  if (category === "Net Products") return 8; // indicative starting rate per sq ft; mesh/GSM changes final quote
+  if (category === "Tirpal & Tarpaulin") return 4.5; // indicative starting rate per sq ft; GSM/material changes final quote
   return 99;
 }
 
@@ -89,15 +89,14 @@ export async function POST(request: NextRequest) {
       const slug = category.slug + "-" + slugify(name);
       const price = estimatePrice(category.name, name);
       const image = "/api/catalogue/illustration/" + slug;
+      const isCustom = category.slug === "net-products" || category.slug === "tirpal-tarpaulin";
       return { updateOne: {
         filter: { slug, price: { $in: [0, null] } },
         update: { $set: {
           price, image,
-          description: name + " from PINAKK. Indicative online-market reference price: ₹" + price +
-            (category.slug === "net-products" || category.slug === "tirpal-tarpaulin" ? " starting estimate; final price depends on size, GSM and material." : ".") +
-            " Illustration image is for catalogue display; confirm brand, exact specification and local selling price before accepting orders.",
-          tags: [name, category.name, "indicative-price", "illustration-image", "verify-before-sale"]
-        } },
+          description: name + " from PINAKK. Indicative online-market reference price: ₹" + price + (isCustom ? " per sq ft starting estimate; final price depends on size, GSM, mesh and material." : " estimated per item; actual brand, pack size and edition may change the price.") + " Illustration image is for catalogue display; confirm exact specification and local selling price before accepting orders.",
+          ...(isCustom ? { customDimensions: { enabled: true, unit: "sq ft", pricePerUnit: price } } : {})
+        }, $addToSet: { tags: { $each: [name, category.name, "indicative-price", "illustration-image", "verify-before-sale"] } } },
       }};
     }));
     const result = await Product.bulkWrite(updates, { ordered: false });
