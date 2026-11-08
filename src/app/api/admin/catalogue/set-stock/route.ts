@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
   try { body = await request.json(); }
   catch { return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 }); }
 
-  if (body?.confirm !== "SET_PINAKK_CATALOGUE_STOCK_TO_20") {
+  const targetQuantity = body?.confirm === "SET_PINAKK_CATALOGUE_STOCK_TO_0" ? 0 : body?.confirm === "SET_PINAKK_CATALOGUE_STOCK_TO_20" ? 20 : null;
+  if (targetQuantity === null) {
     return NextResponse.json({ ok: false, error: "Explicit stock update confirmation is required" }, { status: 400 });
   }
 
@@ -32,13 +33,13 @@ export async function POST(request: NextRequest) {
     );
     const filter = { slug: { $in: slugs } };
     const matched = await Product.countDocuments(filter);
-    const result = await Product.updateMany(filter, { $set: { stock: 20 } });
+    const result = await Product.updateMany(filter, { $set: { stock: targetQuantity } });
     return NextResponse.json({
       ok: true,
-      targetQuantity: 20,
+      targetQuantity,
       matched,
       modified: result.modifiedCount,
-      message: "Catalogue stock values updated. These are test quantities; reconcile physical stock before real fulfilment."
+      message: targetQuantity === 0 ? "Catalogue stock set to zero pending physical inventory verification." : "Catalogue stock values updated. Reconcile physical stock before real fulfilment."
     });
   } catch (error) {
     console.error("PINAKK bulk catalogue stock update failed:", error);
