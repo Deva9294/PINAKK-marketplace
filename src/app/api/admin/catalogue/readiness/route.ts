@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function slugify(value: string) {
-  return value.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "")
+  return value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 150);
 }
 
