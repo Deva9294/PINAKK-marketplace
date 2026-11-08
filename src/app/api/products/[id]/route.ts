@@ -54,8 +54,8 @@ export async function PATCH(request: NextRequest, context: Context) {
       const nextPrice = typeof update.price === "number" ? update.price : current.price;
       const nextImage = typeof update.image === "string" ? update.image : current.image;
       const nextImages = Array.isArray(update.images) ? update.images : current.images;
-      const hasItemImage = (typeof nextImage === "string" && nextImage.trim().length > 0 && !nextImage.startsWith("/catalogue/category-")) ||
-        (Array.isArray(nextImages) && nextImages.some((image: unknown) => typeof image === "string" && image.trim().length > 0 && !image.startsWith("/catalogue/category-")));
+      const hasItemImage = (typeof nextImage === "string" && nextImage.trim().length > 0 && !nextImage.startsWith("/catalogue/category-") && !nextImage.startsWith("/api/catalogue/illustration/")) ||
+        (Array.isArray(nextImages) && nextImages.some((image: unknown) => typeof image === "string" && image.trim().length > 0 && !image.startsWith("/catalogue/category-") && !image.startsWith("/api/catalogue/illustration/")));
       if (!(nextPrice > 0)) return NextResponse.json({ ok: false, error: "Enter the actual selling price before publishing this product" }, { status: 400 });
       if (!hasItemImage) return NextResponse.json({ ok: false, error: "Add an item-specific product photo before publishing this product" }, { status: 400 });
     }
