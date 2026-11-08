@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
         update: { $set: {
           price, image,
           description: name + " from PINAKK. Indicative online-market reference price: ₹" + price + (isCustom ? " per sq ft starting estimate; final price depends on size, GSM, mesh and material." : " estimated per item; actual brand, pack size and edition may change the price.") + " Illustration image is for catalogue display; confirm exact specification and local selling price before accepting orders.",
-          ...(isCustom ? { customDimensions: { enabled: true, unit: "sq ft", pricePerUnit: price } } : {})
+          ...(isCustom ? { customDimensions: { enabled: true, unit: "sq ft" as const, pricePerUnit: price } } : {})
         }, $addToSet: { tags: { $each: [name, category.name, "indicative-price", "illustration-image", "verify-before-sale"] } } },
       }};
     }));
