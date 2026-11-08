@@ -30,13 +30,14 @@ export async function GET(request: NextRequest) {
     const hasItemImage = (product: (typeof products)[number]) =>
       [product.image, ...(product.images || [])].some(image =>
         typeof image === "string" && image.trim().length > 0 &&
-        !image.startsWith("/catalogue/category-")
+        !image.startsWith("/catalogue/category-") && !image.startsWith("/api/catalogue/illustration/")
       );
 
     const foundSlugs = new Set(products.map(product => product.slug));
     const missingPrice = products.filter(product => !(Number(product.price) > 0)).length;
     const missingImage = products.filter(product => !hasItemImage(product)).length;
     const stockNot20 = products.filter(product => Number(product.stock) !== 20).length;
+    const illustrationOnly = products.filter(product => [product.image, ...(product.images || [])].some(image => typeof image === "string" && image.startsWith("/api/catalogue/illustration/")) && !hasItemImage(product)).length;
     const published = products.filter(product => product.active === true).length;
 
     return NextResponse.json({
@@ -46,6 +47,7 @@ export async function GET(request: NextRequest) {
       missingRecords: uniqueSlugs.filter(slug => !foundSlugs.has(slug)).length,
       missingPrice,
       missingImage,
+      illustrationOnly,
       stockNot20,
       published,
       readyToPublish: products.filter(product =>
