@@ -89,7 +89,7 @@ export default function Storefront() {
       .then(data => {
         if (Array.isArray(data.products)) {
           setCatalogue(data.products.map((p: any) => ({
-            id: String(p._id), name: p.name, category: p.category, price: p.price,
+            id: String(p._id), slug: p.slug, name: p.name, category: p.category, price: p.price,
             oldPrice: p.compareAtPrice, description: p.description,
             image: p.image || "/pinakk-logo.svg",
             stock: p.stock, subcategory: p.subcategory || "", badge: undefined
@@ -109,15 +109,16 @@ export default function Storefront() {
 
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
   const availableCategories = ["All", ...categoryRecords.map(item => item.name)];
+  const selectedCategorySlug = categoryRecords.find(item => item.name === category)?.slug;
   const filtered = useMemo(
     () => catalogue.filter(p =>
-      (category === "All" || p.category === category) &&
+      (category === "All" || p.category === category || (!!selectedCategorySlug && !!p.slug && p.slug.startsWith(selectedCategorySlug + "-"))) &&
       (p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.category.toLowerCase().includes(query.toLowerCase()) ||
         (p.description || "").toLowerCase().includes(query.toLowerCase()) ||
         (p.subcategory || "").toLowerCase().includes(query.toLowerCase()))
     ),
-    [query, category, catalogue]
+    [query, category, selectedCategorySlug, catalogue]
   );
   const suggestions = useMemo(
     () => query.trim() ? catalogue.filter(p => (p.name + " " + (p.subcategory || "")).toLowerCase().includes(query.toLowerCase())).slice(0, 5) : [],
