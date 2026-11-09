@@ -23,10 +23,15 @@ export default async function AllProductsPage({ searchParams }: Props) {
   const sortKey = params.sort || "newest";
   const sort: Record<string, 1 | -1> = sortKey === "price-low" ? { price: 1 } : sortKey === "price-high" ? { price: -1 } : { createdAt: -1 };
   const filter: Record<string, any> = { active: true };
-  if (category && category !== "All") filter.category = category;
+  const selectedCategory = catalogueCategories.find(c => c.name === category);
+  if (category && category !== "All") {
+    const categoryMatch: Record<string, any>[] = [{ category }];
+    if (selectedCategory) categoryMatch.push({ slug: { $regex: "^" + selectedCategory.slug + "-" } });
+    filter.$or = categoryMatch;
+  }
   if (query) {
-    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    filter.$or = [
+    const escaped = query.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&");
+    const searchMatch = [
       { name: { $regex: escaped, $options: "i" } },
       { brand: { $regex: escaped, $options: "i" } },
       { category: { $regex: escaped, $options: "i" } },
@@ -34,6 +39,8 @@ export default async function AllProductsPage({ searchParams }: Props) {
       { tags: { $regex: escaped, $options: "i" } },
       { sku: { $regex: escaped, $options: "i" } }
     ];
+    filter.$and = [...(filter.$or ? [{ $or: filter.$or }] : []), { $or: searchMatch }];
+    delete filter.$or;
   }
 
   let products: any[] = [];
