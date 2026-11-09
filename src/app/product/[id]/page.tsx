@@ -160,7 +160,7 @@ export default async function ProductPage({ params }: PageProps) {
           </div>
           <p className="pk-detail-tax-note">{product.gstRate !== undefined ? "GST " + product.gstRate + "% · " : ""}Final tax and invoice details are shown at checkout.</p>
           <span className={product.stock > 0 ? "pk-detail-stock" : "pk-detail-stock out"}>{product.stock > 0 ? "In stock · " + product.stock + " available" : "Currently out of stock"}</span>
-          <ProductAddButton productId={product.id} productName={product.name} disabled={product.stock < 1} />
+          <ProductAddButton productId={product.id} productName={product.name} maxQuantity={product.stock} disabled={product.stock < 1} />
           <div className="pk-detail-benefits"><span>✓ COD / Pay at Store</span><span>✓ Order status updates</span><span>✓ Local customer support</span></div>
           {product.sku && <p className="pk-detail-sku">Product code: {product.sku}</p>}
         </div>
