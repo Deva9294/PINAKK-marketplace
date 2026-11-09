@@ -88,7 +88,6 @@ export async function POST(request: NextRequest) {
     const updates = catalogueCategories.flatMap(category => category.items.map(name => {
       const slug = category.slug + "-" + slugify(name);
       const price = estimatePrice(category.name, name);
-      const image = "/api/catalogue/illustration/" + slug;
       const isCustom = category.slug === "net-products" || category.slug === "tirpal-tarpaulin";
       return { updateOne: {
         filter: { slug, price: { $in: [0, null] } },
