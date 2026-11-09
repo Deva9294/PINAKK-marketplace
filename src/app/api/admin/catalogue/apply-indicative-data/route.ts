@@ -107,15 +107,22 @@ export async function POST(request: NextRequest) {
       }};
     }));
     const imageResult = await Product.bulkWrite(imageUpdates, { ordered: false });
-    const launchUpdates = catalogueCategories.flatMap(category => category.items.map(name => ({
-      updateOne: {
-        filter: { slug: category.slug + "-" + slugify(name) },
+    const catalogueSlugs = updates.map(x => x.updateOne.filter.slug);
+    const launchProducts = await Product.find({ slug: { $in: catalogueSlugs } }).select("slug description").lean();
+    const launchUpdates = launchProducts.map(product => {
+      const stockNote = "Launch stock is provisional (20 units); PINAKK will confirm availability before dispatch.";
+      const description = String(product.description || "");
+      return { updateOne: {
+        filter: { slug: product.slug },
         update: {
-          $set: { active: true, stock: 20 },
+          $set: {
+            active: true, stock: 20,
+            description: description.includes(stockNote) ? description : [description, stockNote].filter(Boolean).join(" ")
+          },
           $addToSet: { tags: { $each: ["temporary-stock-20", "launch-catalogue", "availability-confirmation"] } }
         }
-      }
-    })));
+      }};
+    });
     const launchResult = await Product.bulkWrite(launchUpdates, { ordered: false });
     const total = await Product.countDocuments({ slug: { $in: updates.map(x => x.updateOne.filter.slug) } });
     const stillMissingPrice = await Product.countDocuments({ slug: { $in: updates.map(x => x.updateOne.filter.slug) }, $or: [{ price: { $lte: 0 } }, { price: { $exists: false } }] });
