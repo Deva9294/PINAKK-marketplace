@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/admin-auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import Product from "@/models/Product";
+import Category from "@/models/Category";
+import { catalogueCategories } from "@/lib/catalogue";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -68,7 +70,19 @@ export async function GET(request: NextRequest) {
     const minPrice = params.get("minPrice");
     const maxPrice = params.get("maxPrice");
 
-    if (category && category.length <= 80 && category !== "All") filter.category = category;
+    if (category && category.length <= 100 && category !== "All") {
+      // Accept category display names and canonical slugs. The slug prefix also
+      // keeps older/imported catalogue products discoverable.
+      const catalogueMatch = catalogueCategories.find(item => item.name === category || item.slug === category);
+      const storedMatch = catalogueMatch ? null : await Category.findOne({
+        $or: [{ name: category }, { slug: category }],
+        active: true
+      }).select("slug").lean();
+      const categorySlug = catalogueMatch?.slug || storedMatch?.slug;
+      const categoryConditions: Record<string, unknown>[] = [{ category }];
+      if (categorySlug) categoryConditions.push({ slug: { $regex: "^" + categorySlug + "-" } });
+      filter.$and = [...(filter.$and || []), { $or: categoryConditions }];
+    }
     if (brand && brand.length <= 100) filter.brand = brand;
     if (search && search.length <= 100) {
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
