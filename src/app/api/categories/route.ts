@@ -25,13 +25,17 @@ function validCategory(value: unknown) {
 }
 
 async function seedDefaults() {
-  if (await Category.countDocuments() > 0) return;
-  try {
-    await Category.insertMany(catalogueCategories, { ordered: false });
-  } catch (error) {
-    // Concurrent first requests can race on the unique slug index; retain whichever insert won.
-    if (!(typeof error === "object" && error !== null && "code" in error && error.code === 11000)) throw error;
-  }
+  // Add only missing default categories. Never overwrite categories edited by the admin.
+  await Category.bulkWrite(
+    catalogueCategories.map(category => ({
+      updateOne: {
+        filter: { slug: category.slug },
+        update: { $setOnInsert: category },
+        upsert: true
+      }
+    })),
+    { ordered: false }
+  );
 }
 
 export async function GET(request: NextRequest) {
