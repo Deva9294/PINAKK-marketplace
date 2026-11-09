@@ -16,7 +16,7 @@ function validProduct(value: unknown): value is Record<string, unknown> {
     Object.entries(v as Record<string, unknown>).length <= 40 &&
     Object.entries(v as Record<string, unknown>).every(([k, val]) => k.length <= 60 && typeof val === "string" && val.length <= 250)
   );
-  const hasItemImage = (typeof p.image === "string" && p.image.trim().length > 0 && !p.image.startsWith("/catalogue/category-") && !p.image.startsWith("/api/catalogue/illustration/")) || (Array.isArray(p.images) && p.images.some(x => typeof x === "string" && x.trim().length > 0 && !x.startsWith("/catalogue/category-") && !x.startsWith("/api/catalogue/illustration/")));
+  const hasItemImage = (typeof p.image === "string" && p.image.trim().length > 0 && !p.image.startsWith("/catalogue/category-")) || (Array.isArray(p.images) && p.images.some(x => typeof x === "string" && x.trim().length > 0 && !x.startsWith("/catalogue/category-")));
   return (p.active === false || (typeof p.price === "number" && p.price > 0 && hasItemImage)) && typeof p.name === "string" && p.name.trim().length > 0 && p.name.length <= 160 &&
     typeof p.slug === "string" && p.slug.length <= 180 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.slug) &&
     typeof p.category === "string" && p.category.trim().length > 0 && p.category.length <= 80 &&
