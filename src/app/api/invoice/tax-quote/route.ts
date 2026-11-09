@@ -12,7 +12,17 @@ export async function POST(request:NextRequest){
   const ids=body.items.map((x:any)=>String(x.productId||""));
   if(ids.some((id:string)=>!mongoose.isValidObjectId(id)))return NextResponse.json({ok:false,error:"Invalid product"},{status:400});
   const products=await Product.find({_id:{$in:ids},active:true}).lean();if(products.length!==new Set(ids).size)return NextResponse.json({ok:false,error:"A product is unavailable"},{status:409});
-  const qty=new Map<string,number>();for(const x of body.items){const q=Number(x.quantity);if(!Number.isInteger(q)||q<1||q>20)return NextResponse.json({ok:false,error:"Invalid quantity"},{status:400});qty.set(String(x.productId),(qty.get(String(x.productId))||0)+q)}
+  const qty=new Map<string,number>();
+  for(const x of body.items){
+   const q=Number(x.quantity);
+   if(!Number.isInteger(q)||q<1||q>20)return NextResponse.json({ok:false,error:"Invalid quantity"},{status:400});
+   qty.set(String(x.productId),(qty.get(String(x.productId))||0)+q);
+  }
+  if([...qty.values()].some(q=>q>20))return NextResponse.json({ok:false,error:"Maximum 20 units per product per order"},{status:400});
+  for(const product of products){
+   const requested=qty.get(String(product._id))||0;
+   if(requested>Number(product.stock||0))return NextResponse.json({ok:false,error:"Insufficient stock for "+product.name},{status:409});
+  }
   const settings=await InvoiceSettings.findOne({key:"default"}).lean()||{defaultGstRate:0,pricesIncludeGst:true,stateCode:"23"};
   const subtotal=products.reduce((sum,p)=>sum+p.price*(qty.get(String(p._id))||0),0);
   const discount=Math.max(0,Math.min(subtotal,Number(body.discount)||0));
