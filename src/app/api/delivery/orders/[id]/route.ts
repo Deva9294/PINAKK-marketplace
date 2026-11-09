@@ -13,14 +13,19 @@ export async function PATCH(request:NextRequest,context:{params:Promise<{id:stri
  if(!["shipped","delivered"].includes(body?.status))return NextResponse.json({ok:false,error:"Invalid delivery status"},{status:400});
  try{
   await connectToDatabase();
-  const order=await Order.findOne({_id:id,deliveryBoyId:session.id});
-  if(!order)return NextResponse.json({ok:false,error:"Delivery not assigned to this account"},{status:404});
+  const current=await Order.findOne({_id:id,deliveryBoyId:session.id}).select("status paymentMethod").lean();
+  if(!current)return NextResponse.json({ok:false,error:"Delivery not assigned to this account"},{status:404});
   const allowed:Record<string,string[]>={ready:["shipped"],shipped:["delivered"]};
-  if(!allowed[order.status]?.includes(body.status))return NextResponse.json({ok:false,error:"This delivery update is not allowed"},{status:409});
-  if(body.status==="delivered"&&order.paymentMethod==="cash-on-delivery"&&body.cashCollected!==true)return NextResponse.json({ok:false,error:"Confirm that the COD cash has been collected before completing delivery."},{status:400});
-  order.status=body.status;
-  if(body.status==="delivered"&&order.paymentMethod==="cash-on-delivery")order.paymentStatus="paid";
-  await order.save();
-  return NextResponse.json({ok:true,status:order.status});
+  if(!allowed[current.status]?.includes(body.status))return NextResponse.json({ok:false,error:"This delivery update is not allowed"},{status:409});
+  if(body.status==="delivered"&&current.paymentMethod==="cash-on-delivery"&&body.cashCollected!==true)return NextResponse.json({ok:false,error:"Confirm that the COD cash has been collected before completing delivery."},{status:400});
+  const update:any={status:body.status};
+  if(body.status==="delivered"&&current.paymentMethod==="cash-on-delivery")update.paymentStatus="paid";
+  const updated=await Order.findOneAndUpdate(
+   {_id:id,deliveryBoyId:session.id,status:current.status},
+   {$set:update},
+   {new:true,runValidators:true}
+  ).select("status").lean();
+  if(!updated)return NextResponse.json({ok:false,error:"Delivery status changed in another session. Refresh your assigned orders."},{status:409});
+  return NextResponse.json({ok:true,status:updated.status});
  }catch{return NextResponse.json({ok:false,error:"Could not update delivery"},{status:503})}
 }
