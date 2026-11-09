@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { readUserSession } from "@/lib/user-auth";
 import Order from "@/models/Order";
+import User from "@/models/User";
+import { phoneLookupValues } from "@/lib/user-auth";
 import DeliveryLocation from "@/models/DeliveryLocation";
 
 export const runtime = "nodejs";
@@ -15,9 +17,15 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
   if (!mongoose.isValidObjectId(id)) return NextResponse.json({ ok: false, error: "Invalid order" }, { status: 400 });
   try {
     await connectToDatabase();
-    const order = await Order.findOne({ _id: id, customerUserId: session.id })
-      .select("orderNumber status fulfillmentMethod deliveryBoyId address")
-      .lean();
+    const account = await User.findById(session.id).select("phone").lean() as { phone?: string } | null;
+    if (!account?.phone) return NextResponse.json({ ok: false, error: "Customer account not found" }, { status: 404 });
+    const order = await Order.findOne({
+      _id: id,
+      $or: [
+        { customerUserId: session.id },
+        { customerUserId: null, "customer.phone": { $in: phoneLookupValues(account.phone) } }
+      ]
+    }).select("orderNumber status fulfillmentMethod deliveryBoyId address").lean();
     if (!order) return NextResponse.json({ ok: false, error: "Order not found" }, { status: 404 });
     if (order.fulfillmentMethod !== "delivery" || !order.deliveryBoyId) {
       return NextResponse.json({ ok: true, order, location: null, message: "Courier tracking will appear after a delivery partner is assigned and starts the delivery." });
