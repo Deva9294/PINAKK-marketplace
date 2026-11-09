@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { connectToDatabase } from "@/lib/mongodb";
 import Product from "@/models/Product";
+import Category from "@/models/Category";
 import { catalogueCategories } from "@/lib/catalogue";
 
 export const dynamic = "force-dynamic";
@@ -38,8 +39,13 @@ export default async function AllProductsPage({ searchParams }: Props) {
   let products: any[] = [];
   let total = 0;
   let unavailable = false;
+  let categoryRecords: any[] = catalogueCategories;
   try {
     await connectToDatabase();
+    const storedCategories = await Category.find({ active: true }).sort({ displayOrder: 1, name: 1 }).lean();
+    const bySlug = new Map<string, any>(catalogueCategories.map(c => [c.slug, c]));
+    for (const c of storedCategories) bySlug.set(c.slug, { ...bySlug.get(c.slug), ...c });
+    categoryRecords = [...bySlug.values()].sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999) || a.name.localeCompare(b.name));
     [products, total] = await Promise.all([
       Product.find(filter).select("_id name slug category subcategory price compareAtPrice image stock").sort(sort).skip((page - 1) * 24).limit(24).lean(),
       Product.countDocuments(filter)
@@ -73,13 +79,22 @@ export default async function AllProductsPage({ searchParams }: Props) {
         <input name="q" defaultValue={query} placeholder="Search products, brand or SKU" style={{ minWidth: 0, padding: "12px 14px", border: "1px solid #dbe2ea", borderRadius: 10 }} />
         <select name="category" defaultValue={category} style={{ padding: "12px", border: "1px solid #dbe2ea", borderRadius: 10, background: "white" }}>
           <option value="">All categories</option>
-          {catalogueCategories.map(c => <option key={c.slug} value={c.name}>{c.name}</option>)}
+          {categoryRecords.map(c => <option key={c.slug} value={c.name}>{c.name}</option>)}
         </select>
         <select name="sort" defaultValue={sortKey} style={{ padding: "12px", border: "1px solid #dbe2ea", borderRadius: 10, background: "white" }}>
           <option value="newest">Recently added</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option>
         </select>
         <button type="submit" style={{ border: 0, borderRadius: 10, padding: "12px 20px", background: "#1e40af", color: "white", fontWeight: 700 }}>Apply</button>
       </form>
+      <section aria-label="Browse all product categories" style={{ margin: "4px 0 28px" }}>
+        <h2 style={{ fontSize: 21, margin: "0 0 14px" }}>Browse all categories</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 12 }}>
+          {categoryRecords.map(c => <Link key={c.slug} href={"/products?category=" + encodeURIComponent(c.name)} style={{ display: "flex", gap: 12, alignItems: "center", padding: 13, border: "1px solid #e5e7eb", borderRadius: 13, background: category === c.name ? "#eff6ff" : "white", color: "#111827", textDecoration: "none" }}>
+            <span style={{ position: "relative", width: 54, height: 54, flex: "0 0 54px", borderRadius: 10, overflow: "hidden", background: "#f8fafc" }}><Image src={c.image || "/pinakk-logo.svg"} alt="" fill sizes="54px" style={{ objectFit: "contain", padding: 5 }} /></span>
+            <span><b style={{ display: "block", fontSize: 14 }}>{c.name}</b><small style={{ color: "#64748b", lineHeight: 1.4 }}>{c.description}</small></span>
+          </Link>)}
+        </div>
+      </section>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, color: "#64748b", fontSize: 13 }}>
         <span>{total} products found</span>
         {(query || category) && <Link href="/products" style={{ color: "#1e40af" }}>Clear filters</Link>}
@@ -106,22 +121,6 @@ export default async function AllProductsPage({ searchParams }: Props) {
           <h2 style={{ fontSize: 22, margin: "0 0 8px" }}>{total === 0 && !query && !category ? "Products are not published yet" : "No products match your search"}</h2>
           <p style={{ color: "#64748b", maxWidth: 520, margin: "0 auto 18px", lineHeight: 1.6 }}>{total === 0 && !query && !category ? "The store catalogue currently has no active product records. The store team needs to add and publish products in the admin dashboard. We have not inserted sample or made-up products." : "Try a different product name or category, or clear your filters to browse the full catalogue."}</p>
           <Link href="/products" style={{ display: "inline-block", background: "#1e40af", color: "white", padding: "11px 18px", borderRadius: 10, textDecoration: "none", fontWeight: 700 }}>Show all products</Link>
-          <section style={{ maxWidth: 1000, margin: "34px auto 0", textAlign: "left" }}>
-            <h2 style={{ fontSize: 22, marginBottom: 6 }}>Browse the PINAKK catalogue</h2>
-            <p style={{ color: "#64748b", lineHeight: 1.6, marginBottom: 18 }}>These are catalogue item names, not yet live sale listings. A product becomes orderable after the store adds its verified item photo, actual price and available stock in Admin → Products and publishes it.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 14 }}>
-              {catalogueCategories.filter(c => !category || category === "All" || c.name === category).map(c => {
-                const visibleItems = c.items.filter(item => !query || item.toLowerCase().includes(query.toLowerCase()));
-                if (!visibleItems.length) return null;
-                return <article key={c.slug} style={{ background: "white", border: "1px solid #e5e7eb", borderRadius: 13, padding: 15 }}>
-                  <h3 style={{ fontSize: 16, margin: "0 0 10px" }}>{c.name}</h3>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                    {visibleItems.map(item => <span key={item} style={{ background: "#f1f5f9", borderRadius: 20, padding: "5px 9px", fontSize: 12, color: "#334155" }}>{item}</span>)}
-                  </div>
-                </article>;
-              })}
-            </div>
-          </section>
         </div>
       )}
       {pages > 1 && <nav aria-label="Product pages" style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 28, alignItems: "center" }}>
