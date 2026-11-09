@@ -23,12 +23,8 @@ export default async function AllProductsPage({ searchParams }: Props) {
   const sortKey = params.sort || "newest";
   const sort: Record<string, 1 | -1> = sortKey === "price-low" ? { price: 1 } : sortKey === "price-high" ? { price: -1 } : { createdAt: -1 };
   const filter: Record<string, any> = { active: true };
-  const selectedCategory = catalogueCategories.find(c => c.name === category);
-  if (category && category !== "All") {
-    const categoryMatch: Record<string, any>[] = [{ category }];
-    if (selectedCategory) categoryMatch.push({ slug: { $regex: "^" + selectedCategory.slug + "-" } });
-    filter.$or = categoryMatch;
-  }
+  const selectedCategory = catalogueCategories.find(c => c.name === category || c.slug === category);
+  let categorySlug = selectedCategory?.slug;
   if (query) {
     const escaped = [...query].map(char => ".*+?^${}()|[]\\\\".includes(char) ? "\\" + char : char).join("");
     const searchMatch = [
@@ -39,7 +35,7 @@ export default async function AllProductsPage({ searchParams }: Props) {
       { tags: { $regex: escaped, $options: "i" } },
       { sku: { $regex: escaped, $options: "i" } }
     ];
-    filter.$and = [...(filter.$or ? [{ $or: filter.$or }] : []), { $or: searchMatch }];
+    filter.$and = [...(filter.$and || []), ...(filter.$or ? [{ $or: filter.$or }] : []), { $or: searchMatch }];
     delete filter.$or;
   }
 
@@ -53,6 +49,13 @@ export default async function AllProductsPage({ searchParams }: Props) {
     const bySlug = new Map<string, any>(catalogueCategories.map(c => [c.slug, c]));
     for (const c of storedCategories) bySlug.set(c.slug, { ...bySlug.get(c.slug), ...c });
     categoryRecords = [...bySlug.values()].sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999) || a.name.localeCompare(b.name));
+    const matchedCategory = categoryRecords.find(c => c.name === category || c.slug === category);
+    categorySlug = matchedCategory?.slug || categorySlug;
+    if (category && category !== "All") {
+      const categoryMatch: Record<string, any>[] = [{ category }];
+      if (categorySlug) categoryMatch.push({ slug: { $regex: "^" + categorySlug + "-" } });
+      filter.$or = categoryMatch;
+    }
     [products, total] = await Promise.all([
       Product.find(filter).select("_id name slug category subcategory price compareAtPrice image stock").sort(sort).skip((page - 1) * 24).limit(24).lean(),
       Product.countDocuments(filter)
