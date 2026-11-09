@@ -30,7 +30,7 @@ export default async function AllProductsPage({ searchParams }: Props) {
     filter.$or = categoryMatch;
   }
   if (query) {
-    const escaped = query.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&");
+    const escaped = [...query].map(char => ".*+?^${}()|[]\\\\".includes(char) ? "\\" + char : char).join("");
     const searchMatch = [
       { name: { $regex: escaped, $options: "i" } },
       { brand: { $regex: escaped, $options: "i" } },
