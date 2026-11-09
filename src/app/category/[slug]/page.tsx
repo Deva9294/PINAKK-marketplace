@@ -44,14 +44,12 @@ export default async function CategoryPage({ params }: Props) {
   let products: any[] = [];
   try {
     await connectToDatabase();
-    const escapedSlug = category.slug.replace(/[.*+?^${}()|[\]\\]/g, "\\    products = await Product.find({ active: true, category: category.name })
-      .select("_id name slug price compareAtPrice image stock subcategory")
-      .sort({ createdAt: -1 }).limit(100).lean();");
+    const slugPrefix = "^" + category.slug + "-";
     products = await Product.find({
       active: true,
       $or: [
         { category: category.name },
-        { slug: { $regex: "^" + escapedSlug + "-" } }
+        { slug: { $regex: slugPrefix } }
       ]
     })
       .select("_id name slug price compareAtPrice image stock subcategory")
