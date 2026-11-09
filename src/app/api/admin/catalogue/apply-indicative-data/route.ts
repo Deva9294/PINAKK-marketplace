@@ -93,20 +93,41 @@ export async function POST(request: NextRequest) {
       return { updateOne: {
         filter: { slug, price: { $in: [0, null] } },
         update: { $set: {
-          price, image,
+          price,
           description: name + " from PINAKK. Indicative online-market reference price: ₹" + price + (isCustom ? " per sq ft starting estimate; final price depends on size, GSM, mesh and material." : " estimated per item; actual brand, pack size and edition may change the price.") + " Illustration image is for catalogue display; confirm exact specification and local selling price before accepting orders.",
           ...(isCustom ? { customDimensions: { enabled: true, unit: "sq ft" as const, pricePerUnit: price } } : {})
         }, $addToSet: { tags: { $each: [name, category.name, "indicative-price", "illustration-image", "verify-before-sale"] } } },
       }};
     }));
     const result = await Product.bulkWrite(updates, { ordered: false });
+    const imageUpdates = catalogueCategories.flatMap(category => category.items.map(name => {
+      const slug = category.slug + "-" + slugify(name);
+      return { updateOne: {
+        filter: { slug, $or: [{ image: "" }, { image: null }, { image: { $exists: false } }] },
+        update: { $set: { image: "/api/catalogue/illustration/" + slug } }
+      }};
+    }));
+    const imageResult = await Product.bulkWrite(imageUpdates, { ordered: false });
+    const launchUpdates = catalogueCategories.flatMap(category => category.items.map(name => ({
+      updateOne: {
+        filter: { slug: category.slug + "-" + slugify(name) },
+        update: {
+          $set: { active: true, stock: 20 },
+          $addToSet: { tags: { $each: ["temporary-stock-20", "launch-catalogue", "availability-confirmation"] } }
+        }
+      }
+    })));
+    const launchResult = await Product.bulkWrite(launchUpdates, { ordered: false });
     const total = await Product.countDocuments({ slug: { $in: updates.map(x => x.updateOne.filter.slug) } });
     const stillMissingPrice = await Product.countDocuments({ slug: { $in: updates.map(x => x.updateOne.filter.slug) }, $or: [{ price: { $lte: 0 } }, { price: { $exists: false } }] });
     const missingImage = await Product.countDocuments({ slug: { $in: updates.map(x => x.updateOne.filter.slug) }, $or: [{ image: "" }, { image: { $exists: false } }] });
     return NextResponse.json({
       ok: true, matchedCatalogueRecords: total, pricesAdded: result.modifiedCount,
-      stillMissingPrice, missingImage, published: 0,
-      message: "Indicative estimates and original illustration cards applied to unpublished drafts. Confirm local prices, exact variants and physical inventory before publishing."
+      illustrationsAdded: imageResult.modifiedCount, launchListingsActivated: launchResult.modifiedCount,
+      stillMissingPrice, missingImage,
+      published: await Product.countDocuments({ slug: { $in: updates.map(x => x.updateOne.filter.slug) }, active: true }),
+      temporaryStockSetTo20: launchResult.modifiedCount,
+      message: "Launch catalogue activated with indicative prices, illustrations and provisional stock 20. Availability must be confirmed by the store before dispatch."
     });
   } catch (error) {
     console.error("PINAKK indicative catalogue update failed:", error);
