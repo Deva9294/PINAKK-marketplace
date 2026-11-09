@@ -7,6 +7,7 @@ export const runtime="nodejs";
 export const dynamic="force-dynamic";
 export async function POST(request:NextRequest){
  try{
+  await connectToDatabase();
   const body=await request.json();if(!Array.isArray(body.items)||body.items.length<1||body.items.length>50)return NextResponse.json({ok:false,error:"Invalid cart"},{status:400});
   const ids=body.items.map((x:any)=>String(x.productId||""));
   if(ids.some((id:string)=>!mongoose.isValidObjectId(id)))return NextResponse.json({ok:false,error:"Invalid product"},{status:400});
