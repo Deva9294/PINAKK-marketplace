@@ -92,7 +92,7 @@ export default function Storefront() {
             id: String(p._id), slug: p.slug, name: p.name, category: p.category, price: p.price,
             oldPrice: p.compareAtPrice, description: p.description,
             image: p.image || "/pinakk-logo.svg",
-            stock: p.stock, subcategory: p.subcategory || "", badge: undefined
+            stock: p.stock, subcategory: p.subcategory || "", tags: Array.isArray(p.tags) ? p.tags : [], badge: undefined
           })));
           setCatalogueSource("database");
         }
@@ -268,7 +268,7 @@ export default function Storefront() {
                 <button className={wishlist.includes(p.id) ? "is-saved" : ""} onClick={() => toggleWish(p.id)} aria-label="Save to wishlist"><Heart size={18} /></button>
               </div>
               <div className="pk-product-details">
-                <small className="pk-product-category">{p.category}</small>
+                <small className="pk-product-category">{p.category}</small>\n                {p.tags?.includes("indicative-price") && <small className="pk-stock">Indicative price · confirm before ordering</small>}
                 <Link href={"/product/" + p.id} className="pk-product-name">{p.name}</Link>
                 <div className="pk-price-row"><b>₹{p.price.toLocaleString("en-IN")}</b>{p.oldPrice && p.oldPrice > p.price && <del>₹{p.oldPrice.toLocaleString("en-IN")}</del>}{p.oldPrice && p.oldPrice > p.price && <em>{Math.round((1 - p.price / p.oldPrice) * 100)}% off</em>}</div>
                 <small className={p.stock > 0 ? "pk-stock" : "pk-out-stock"}>{p.stock > 0 ? "Available to order" : "Currently unavailable"}</small>
