@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { ShoppingBag, Check } from "lucide-react";
 
-type Props = { productId: string; productName: string; maxQuantity: number; disabled?: boolean };
+type Props = { productId: string; productName: string; maxQuantity: number; disabled?: boolean; disabledLabel?: string };
 
-export default function ProductAddButton({ productId, productName, maxQuantity, disabled = false }: Props) {
+export default function ProductAddButton({ productId, productName, maxQuantity, disabled = false, disabledLabel = "Out of stock" }: Props) {
   const [added, setAdded] = useState(false);
   function addToBag() {
     try {
@@ -26,7 +26,7 @@ export default function ProductAddButton({ productId, productName, maxQuantity, 
   return (
     <button className="pk-detail-add" onClick={addToBag} disabled={disabled || maxQuantity < 1} aria-label={"Add " + productName + " to shopping bag"}>
       {added ? <Check size={18} /> : <ShoppingBag size={18} />}
-      {disabled ? "Out of stock" : added ? "Added to your bag" : "Add to bag"}
+      {disabled ? disabledLabel : added ? "Added to your bag" : "Add to bag"}
     </button>
   );
 }
