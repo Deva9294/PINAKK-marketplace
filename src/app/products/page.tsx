@@ -100,7 +100,7 @@ export default async function AllProductsPage({ searchParams }: Props) {
         <h2 style={{ fontSize: 21, margin: "0 0 14px" }}>Browse all categories</h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 12 }}>
           {categoryRecords.map(c => <Link key={c.slug} href={"/products?category=" + encodeURIComponent(c.name)} style={{ display: "flex", gap: 12, alignItems: "center", padding: 13, border: "1px solid #e5e7eb", borderRadius: 13, background: category === c.name ? "#eff6ff" : "white", color: "#111827", textDecoration: "none" }}>
-            <span style={{ position: "relative", width: 54, height: 54, flex: "0 0 54px", borderRadius: 10, overflow: "hidden", background: "#f8fafc" }}><Image src={c.image || "/pinakk-logo.svg"} alt="" fill sizes="54px" style={{ objectFit: "contain", padding: 5 }} /></span>
+            <span style={{ position: "relative", width: 54, height: 54, flex: "0 0 54px", borderRadius: 10, overflow: "hidden", background: "#f8fafc" }}><Image src={c.image || "/pinakk-logo.svg"} alt="" fill unoptimized sizes="54px" style={{ objectFit: "contain", padding: 5 }} /></span>
             <span><b style={{ display: "block", fontSize: 14 }}>{c.name}</b><small style={{ color: "#64748b", lineHeight: 1.4 }}>{c.description}</small></span>
           </Link>)}
         </div>
@@ -115,7 +115,7 @@ export default async function AllProductsPage({ searchParams }: Props) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(190px,1fr))", gap: 16 }}>
           {products.map(p => <article key={String(p._id)} style={{ border: "1px solid #e5e7eb", borderRadius: 15, overflow: "hidden", background: "white", display: "flex", flexDirection: "column" }}>
             <Link href={"/product/" + String(p._id)} style={{ display: "block", position: "relative", height: 180, background: "#f8fafc", padding: 12 }}>
-              <Image src={p.image || "/pinakk-logo.svg"} alt={p.name} fill sizes="(max-width: 600px) 45vw, 220px" style={{ objectFit: "contain", padding: 12 }} />
+              <Image src={p.image || "/pinakk-logo.svg"} alt={p.name} fill unoptimized sizes="(max-width: 600px) 45vw, 220px" style={{ objectFit: "contain", padding: 12 }} />
             </Link>
             <div style={{ padding: 13, display: "flex", flexDirection: "column", flex: 1 }}>
               <small style={{ color: "#64748b" }}>{p.subcategory || p.category}</small>
