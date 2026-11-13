@@ -57,7 +57,7 @@ export default async function AllProductsPage({ searchParams }: Props) {
       filter.$or = categoryMatch;
     }
     [products, total] = await Promise.all([
-      Product.find(filter).select("_id name slug category subcategory price compareAtPrice image stock").sort(sort).skip((page - 1) * 24).limit(24).lean(),
+      Product.find(filter).select("_id name slug category subcategory price compareAtPrice image stock tags").sort(sort).skip((page - 1) * 24).limit(24).lean(),
       Product.countDocuments(filter)
     ]);
   } catch (error) {
@@ -118,7 +118,7 @@ export default async function AllProductsPage({ searchParams }: Props) {
               <Image src={p.image || "/pinakk-logo.svg"} alt={p.name} fill unoptimized sizes="(max-width: 600px) 45vw, 220px" style={{ objectFit: "contain", padding: 12 }} />
             </Link>
             <div style={{ padding: 13, display: "flex", flexDirection: "column", flex: 1 }}>
-              <small style={{ color: "#64748b" }}>{p.subcategory || p.category}</small>
+              <small style={{ color: "#64748b" }}>{p.subcategory || p.category}</small>\n              {p.tags?.includes("indicative-price") && <small style={{ color: "#9a3412", marginTop: 4 }}>Indicative price · confirm before ordering</small>}
               <Link href={"/product/" + String(p._id)} style={{ color: "#111827", fontWeight: 700, textDecoration: "none", margin: "6px 0", lineHeight: 1.4 }}>{p.name}</Link>
               <b style={{ fontSize: 18, marginTop: "auto" }}>₹{Number(p.price).toLocaleString("en-IN")}</b>
               <small style={{ color: p.stock > 0 ? "#15803d" : "#b91c1c", marginTop: 5 }}>{p.stock > 0 ? "In stock" : "Out of stock"}</small>
