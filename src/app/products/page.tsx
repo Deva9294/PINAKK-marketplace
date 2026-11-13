@@ -45,10 +45,12 @@ export default async function AllProductsPage({ searchParams }: Props) {
   let categoryRecords: any[] = catalogueCategories;
   try {
     await connectToDatabase();
-    const storedCategories = await Category.find({ active: true }).sort({ displayOrder: 1, name: 1 }).lean();
+    const storedCategories = await Category.find({}).sort({ displayOrder: 1, name: 1 }).lean();
     const bySlug = new Map<string, any>(catalogueCategories.map(c => [c.slug, c]));
     for (const c of storedCategories) bySlug.set(c.slug, { ...bySlug.get(c.slug), ...c });
-    categoryRecords = [...bySlug.values()].sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999) || a.name.localeCompare(b.name));
+    categoryRecords = [...bySlug.values()]
+      .filter(c => c.active !== false)
+      .sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999) || a.name.localeCompare(b.name));
     const matchedCategory = categoryRecords.find(c => c.name === category || c.slug === category);
     categorySlug = matchedCategory?.slug || categorySlug;
     if (category && category !== "All") {
