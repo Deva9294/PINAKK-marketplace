@@ -43,7 +43,15 @@ export async function GET(request: NextRequest) {
     await connectToDatabase();
     await seedDefaults();
     const includeInactive = request.nextUrl.searchParams.get("all") === "1" && await isAdminRequest(request);
-    const categories = await Category.find(includeInactive ? {} : { active: true }).sort({ displayOrder: 1, name: 1 }).lean();
+    const storedCategories = await Category.find({}).sort({ displayOrder: 1, name: 1 }).lean();
+    // Defaults are visible when no database record exists. If an admin explicitly
+    // disabled a stored category, respect that choice instead of resurrecting it.
+    const bySlug = new Map<string, any>(catalogueCategories.map(category => [category.slug, category]));
+    for (const category of storedCategories) bySlug.set(category.slug, { ...bySlug.get(category.slug), ...category });
+    const mergedCategories = [...bySlug.values()]
+      .filter(category => includeInactive || category.active !== false)
+      .sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999) || a.name.localeCompare(b.name));
+    const categories = includeInactive ? storedCategories : mergedCategories;
     return NextResponse.json({ ok: true, categories, schoolCourseOptions, copyNotebookFilters, netTarpaulinOptions });
   } catch (error) {
     console.error("GET /api/categories failed:", error);
