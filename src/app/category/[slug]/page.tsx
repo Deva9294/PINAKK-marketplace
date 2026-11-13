@@ -75,17 +75,17 @@ export default async function CategoryPage({ params }: Props) {
       </nav>
       <header style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,240px),1fr))", gap: 24, alignItems: "center", background: "#f8fafc", borderRadius: 20, padding: 22 }}>
         <div><p style={{ color: "#1e40af", fontWeight: 700, fontSize: 12, letterSpacing: 1 }}>PINAKK COLLECTION</p><h1 style={{ fontSize: 32, lineHeight: 1.15, margin: "8px 0 12px" }}>{category.name}</h1><p style={{ color: "#475569", lineHeight: 1.7 }}>{category.description}</p></div>
-        <Image src={category.image} alt={category.name + " category illustration"} width={360} height={236} style={{ width: "100%", height: "auto", borderRadius: 14 }} priority />
+        <Image src={category.image} alt={category.name + " category illustration"} unoptimized width={360} height={236} style={{ width: "100%", height: "auto", borderRadius: 14 }} priority />
       </header>
       {category.slug === "school-courses-books" && <CourseFinder />}
       <section style={{ marginTop: 30 }}><h2 style={{ fontSize: 22, marginBottom: 14 }}>Browse subcategories</h2><div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(150px,1fr))", gap: 10 }}>
-        {category.subcategories.map(item => <div key={item} style={{ display: "flex", alignItems: "center", gap: 9, border: "1px solid #e5e7eb", borderRadius: 12, padding: 9, background: "#fff" }}><Image src={category.image} alt="" width={42} height={42} style={{ borderRadius: 8, objectFit: "cover" }} /><span style={{ fontSize: 12, fontWeight: 600 }}>{item}</span></div>)}
+        {category.subcategories.map(item => <div key={item} style={{ display: "flex", alignItems: "center", gap: 9, border: "1px solid #e5e7eb", borderRadius: 12, padding: 9, background: "#fff" }}><Image src={category.image} alt="" unoptimized width={42} height={42} style={{ borderRadius: 8, objectFit: "cover" }} /><span style={{ fontSize: 12, fontWeight: 600 }}>{item}</span></div>)}
       </div></section>
       {!!category.items?.length && <section style={{ marginTop: 28 }}><h2 style={{ fontSize: 22, marginBottom: 12 }}>Complete item list</h2><div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{category.items.map(item => <span key={item} style={{ border: "1px solid #e2e8f0", borderRadius: 20, background: "#fff", padding: "7px 11px", fontSize: 12, color: "#475569" }}>{item}</span>)}</div></section>}
       <section style={{ marginTop: 32 }}><h2 style={{ fontSize: 22, marginBottom: 14 }}>Available products <span style={{ fontSize: 13, color: "#64748b" }}>({products.length})</span></h2>
         {products.length ? <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(170px,1fr))", gap: 14 }}>
           {products.map(p => <Link key={String(p._id)} href={"/product/" + String(p._id)} style={{ border: "1px solid #e5e7eb", borderRadius: 14, overflow: "hidden", background: "#fff", color: "inherit", textDecoration: "none" }}>
-            <div style={{ background: "#f8fafc", padding: 12 }}><Image src={p.image || "/pinakk-logo.svg"} alt={p.name} width={240} height={180} style={{ width: "100%", height: 150, objectFit: "contain" }} /></div>
+            <div style={{ background: "#f8fafc", padding: 12 }}><Image src={p.image || "/pinakk-logo.svg"} alt={p.name} unoptimized width={240} height={180} style={{ width: "100%", height: 150, objectFit: "contain" }} /></div>
             <div style={{ padding: 12 }}><small style={{ color: "#64748b" }}>{p.subcategory || category.name}</small><b style={{ display: "block", margin: "6px 0", fontSize: 13 }}>{p.name}</b><strong>₹{Number(p.price).toLocaleString("en-IN")}</strong><small style={{ display: "block", color: p.stock > 0 ? "#15803d" : "#b91c1c", marginTop: 5 }}>{p.stock > 0 ? "In stock" : "Out of stock"}</small></div>
           </Link>)}
         </div> : <p style={{ color: "#64748b", background: "#f8fafc", padding: 18, borderRadius: 12 }}>No products are listed in this category yet. Please check back soon.</p>}
