@@ -229,7 +229,7 @@ export default function Storefront() {
           {categoryTiles.map((item, i) => {
             const Icon = item.icon;
             return <button className={"pk-category-card pk-cat-" + (i % 4)} key={item.title} onClick={() => chooseCategory(item.filter)}>
-              <span className="pk-category-photo"><Image src={item.image} alt="" fill sizes="(max-width: 700px) 42vw, 22vw" /><i><Icon size={16} /></i></span>
+              <span className="pk-category-photo"><Image src={item.image} alt="" fill unoptimized sizes="(max-width: 700px) 42vw, 22vw" /><i><Icon size={16} /></i></span>
               <span className="pk-category-info"><b>{item.title}</b><small>{item.sub}</small></span><ArrowUpRight className="pk-category-arrow" size={18} />
             </button>;
           })}
@@ -240,7 +240,7 @@ export default function Storefront() {
             <div className="pk-subcategory-list">
               {activeCategory.subcategories.map(item => (
                 <button key={item} onClick={() => { setQuery(item); document.getElementById("pk-products")?.scrollIntoView({ behavior: "smooth" }); }}>
-                  <span><Image src={activeCategory.image} alt={activeCategory.name + " illustrative category"} fill sizes="64px" /></span>
+                  <span><Image src={activeCategory.image} alt={activeCategory.name + " illustrative category"} fill unoptimized sizes="64px" /></span>
                   <b>{item}</b><ArrowUpRight size={14} />
                 </button>
               ))}
@@ -263,7 +263,7 @@ export default function Storefront() {
           <div className="pk-product-grid">
             {filtered.slice(0, 12).map(p => <article className="pk-product-card" key={p.id}>
               <div className="pk-product-image">
-                <Link href={"/product/" + p.id} aria-label={"View " + p.name}><Image src={p.image} alt={p.name} fill sizes="(max-width: 650px) 45vw, 22vw" /></Link>
+                <Link href={"/product/" + p.id} aria-label={"View " + p.name}><Image src={p.image} alt={p.name} fill unoptimized sizes="(max-width: 650px) 45vw, 22vw" /></Link>
                 {p.badge && <span className="pk-product-badge">{p.badge}</span>}
                 <button className={wishlist.includes(p.id) ? "is-saved" : ""} onClick={() => toggleWish(p.id)} aria-label="Save to wishlist"><Heart size={18} /></button>
               </div>
