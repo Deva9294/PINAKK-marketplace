@@ -119,7 +119,7 @@ export default async function ProductPage({ params }: PageProps) {
     sku: product.sku || undefined, mpn: product.barcode || undefined,
     category: [product.category, product.subcategory].filter(Boolean).join(" / "),
     brand: product.brand ? { "@type": "Brand", name: product.brand } : undefined,
-    offers: {
+    offers: product.tags.includes("indicative-price") || product.customDimensions?.enabled || product.variants.length > 0 ? undefined : {
       "@type": "Offer", url: productUrl, priceCurrency: "INR", price: product.price,
       availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       itemCondition: "https://schema.org/NewCondition"
