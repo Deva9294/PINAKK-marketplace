@@ -158,9 +158,9 @@ export default async function ProductPage({ params }: PageProps) {
             {product.oldPrice && product.oldPrice > product.price && <del>₹{product.oldPrice.toLocaleString("en-IN")}</del>}
             {product.oldPrice && product.oldPrice > product.price && <em>{Math.round((1 - product.price / product.oldPrice) * 100)}% off</em>}
           </div>
-          <p className="pk-detail-tax-note">{product.gstRate !== undefined ? "GST " + product.gstRate + "% · " : ""}Final tax and invoice details are shown at checkout.</p>
+          <p className="pk-detail-tax-note">{product.gstRate !== undefined ? "GST " + product.gstRate + "% · " : ""}Final tax and invoice details are shown at checkout.</p>\n          {product.tags.some(tag => ["indicative-price", "illustration-image", "verify-before-sale"].includes(tag)) && <p className="pk-detail-note" role="note">Indicative catalogue listing: the displayed price and illustration are estimates, not a confirmed shop quotation or actual product photo. Please confirm exact brand, size, price and availability with PINAKK before ordering.</p>}
           <span className={product.stock > 0 ? "pk-detail-stock" : "pk-detail-stock out"}>{product.stock > 0 ? "In stock · " + product.stock + " available" : "Currently out of stock"}</span>
-          <ProductAddButton productId={product.id} productName={product.name} maxQuantity={product.stock} disabled={product.stock < 1} />
+          <ProductAddButton productId={product.id} productName={product.name} maxQuantity={product.stock} disabled={product.stock < 1 || product.variants.length > 0 || !!product.customDimensions?.enabled} disabledLabel={product.stock < 1 ? "Out of stock" : "Contact store to confirm"} />
           <div className="pk-detail-benefits"><span>✓ COD / Pay at Store</span><span>✓ Order status updates</span><span>✓ Local customer support</span></div>
           {product.sku && <p className="pk-detail-sku">Product code: {product.sku}</p>}
         </div>
@@ -174,7 +174,7 @@ export default async function ProductPage({ params }: PageProps) {
           <strong>{variant.price !== undefined ? "₹" + variant.price.toLocaleString("en-IN") : "₹" + product.price.toLocaleString("en-IN")}</strong>
           <span className={variant.stock > 0 ? "available" : "unavailable"}>{variant.stock > 0 ? variant.stock + " available" : "Out of stock"}</span>
         </article>)}</div>
-        <p className="pk-detail-note">Variant selection and variant-specific stock reservation are not enabled in this cart yet. Please confirm your preferred option with support before ordering.</p>
+        <p className="pk-detail-note">Variant selection and variant-specific stock reservation are not enabled in this cart yet. Add-to-bag is disabled for this listing until the store confirms the exact option.</p>
       </section>}
 
       <section className="pk-detail-information">
