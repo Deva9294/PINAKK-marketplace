@@ -52,7 +52,7 @@ export default async function CategoryPage({ params }: Props) {
         { slug: { $regex: slugPrefix } }
       ]
     })
-      .select("_id name slug price compareAtPrice image stock subcategory")
+      .select("_id name slug price compareAtPrice image stock subcategory tags")
       .sort({ createdAt: -1 }).limit(100).lean();
   } catch {
     products = [];
@@ -86,7 +86,7 @@ export default async function CategoryPage({ params }: Props) {
         {products.length ? <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(170px,1fr))", gap: 14 }}>
           {products.map(p => <Link key={String(p._id)} href={"/product/" + String(p._id)} style={{ border: "1px solid #e5e7eb", borderRadius: 14, overflow: "hidden", background: "#fff", color: "inherit", textDecoration: "none" }}>
             <div style={{ background: "#f8fafc", padding: 12 }}><Image src={p.image || "/pinakk-logo.svg"} alt={p.name} unoptimized width={240} height={180} style={{ width: "100%", height: 150, objectFit: "contain" }} /></div>
-            <div style={{ padding: 12 }}><small style={{ color: "#64748b" }}>{p.subcategory || category.name}</small><b style={{ display: "block", margin: "6px 0", fontSize: 13 }}>{p.name}</b><strong>₹{Number(p.price).toLocaleString("en-IN")}</strong><small style={{ display: "block", color: p.stock > 0 ? "#15803d" : "#b91c1c", marginTop: 5 }}>{p.stock > 0 ? "In stock" : "Out of stock"}</small></div>
+            <div style={{ padding: 12 }}><small style={{ color: "#64748b" }}>{p.subcategory || category.name}</small>{p.tags?.includes("indicative-price") && <small style={{ display: "block", color: "#9a3412", marginTop: 4 }}>Indicative price · confirm before ordering</small>}<b style={{ display: "block", margin: "6px 0", fontSize: 13 }}>{p.name}</b><strong>₹{Number(p.price).toLocaleString("en-IN")}</strong><small style={{ display: "block", color: p.stock > 0 ? "#15803d" : "#b91c1c", marginTop: 5 }}>{p.stock > 0 ? "In stock" : "Out of stock"}</small></div>
           </Link>)}
         </div> : <p style={{ color: "#64748b", background: "#f8fafc", padding: 18, borderRadius: 12 }}>No products are listed in this category yet. Please check back soon.</p>}
       </section>
